@@ -44,7 +44,9 @@ export default function RootLayout({
       <body className={`${maplestoryFont.className} antialiased`}>
         <Providers>
           <Navbar />
-          {children}
+          <div className="flex justify-center">
+            <div className="w-[100vw] text-center md:w-[80vw]">{children}</div>
+          </div>
         </Providers>
       </body>
     </html>

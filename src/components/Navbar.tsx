@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 import User from "./User";
 
@@ -14,6 +14,7 @@ import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  console.log(session);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mainMenuRef = useRef<HTMLDivElement>(null);
@@ -98,12 +99,14 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 relative">
-          {status === "authenticated" && session && <User />}
+          {status === "authenticated" && session && (
+            <User signOut={signOut} character={session.user.character} />
+          )}
           {status === "unauthenticated" && (
             <Link href="/login">
               <button
                 type="button"
-                className="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-orange-500 dark:hover:bg-orange-600 focus:outline-none dark:focus:ring-orange-800 cursor-pointer"
+                className="text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-orange-500 dark:hover:bg-orange-600 focus:outline-none dark:focus:ring-orange-800 cursor-pointer"
               >
                 로그인
               </button>

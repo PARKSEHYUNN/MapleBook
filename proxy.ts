@@ -1,10 +1,9 @@
-// src/proxy.ts
+// proxy.ts
 
-import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 
 export default auth((req: NextRequest) => {
-  console.log("Proxy Running!");
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
@@ -19,7 +18,3 @@ export default auth((req: NextRequest) => {
 
   return NextResponse.next();
 });
-
-export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
-};

@@ -5,8 +5,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import WorldIcon from "./WorldIcon";
+import { CustomCharacter } from "../../next-auth";
 
-export default function User() {
+export default function User({
+  signOut,
+  character,
+}: {
+  signOut: () => void;
+  character: CustomCharacter;
+}) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -36,9 +44,7 @@ export default function User() {
       >
         <span className="sr-only">Open user menu</span>
         <Image
-          src={
-            "https://avatar.maplestory.nexon.com/Character/180/JGACNDNMKFHCHHKFHNPLDGKBIIBGLNJEANEHKHBENAMLIBPNEHDFEEDMBJFGBALEBBFNIDGDCDGCHLCHCEGILEAKKKHIKJOEHECLOBIFBIMDKFBKMFBHGPPBPCMEBHHCLBHAGEODLLNEBBGDJFINLMEKIOLCKEOAHLMHKKFGMBGALHGEOIEKKAAKNDOICKJNMMILIPGMCGKOAHLOGIHAIAFIAHLACDEMGKEOHFCOENKLFFJGJDMFEBBPLFPIAHPO.png"
-          }
+          src={character.character_image}
           alt="Character Image"
           width={32}
           height={32}
@@ -53,32 +59,27 @@ export default function User() {
       >
         <div className="px-4 py-2">
           <span className="block text-sm text-gray-900 dark:text-white">
-            잇츠미다람쥐
+            {character.character_name}
           </span>
           <div className="flex gap-1 items-center">
             <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-              <Image
-                src={
-                  "https://ssl.nexon.com/s2/game/maplestory/renewal/common/world_icon/icon_8.png"
-                }
-                alt="Server Icon"
-                width={14}
-                height={14}
-                unoptimized={true}
-              />
+              <WorldIcon worldName={character.world_name} />
             </span>
             <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-              스카니아
+              {character.world_name}
             </span>
           </div>
           <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-            Lv. 263 / 팔라딘
+            Lv. {character.character_level} [{character.character_exp_rate}%]
+          </span>
+          <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+            {character.character_class} / {character.character_class_level}차
           </span>
         </div>
         <ul className="py-2">
           <li>
             <Link
-              href="/user"
+              href="/dashboard"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
             >
               내 정보
@@ -96,7 +97,8 @@ export default function User() {
         <ul className="py-2">
           <li>
             <Link
-              href="/logout"
+              href="/"
+              onClick={() => signOut()}
               className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-red-300 dark:hover:text-white"
             >
               로그아웃

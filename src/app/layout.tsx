@@ -3,6 +3,11 @@ import Navbar from "@/components/Navbar";
 import "./globals.css";
 import localFont from "next/font/local";
 
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+config.autoAddCss = false;
+
 const maplestoryFont = localFont({
   src: [
     {
@@ -23,6 +28,9 @@ const maplestoryFont = localFont({
 export const metadata: Metadata = {
   title: "MapleBook",
   description: "Search Maplestory Character",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className=" bg-white dark:bg-gray-900">
       <body className={`${maplestoryFont.className} antialiased`}>
         <Navbar />
         {children}

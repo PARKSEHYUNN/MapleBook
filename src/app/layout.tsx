@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { Providers } from "./providers";
 
 config.autoAddCss = false;
 
@@ -41,8 +42,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className=" bg-white dark:bg-gray-900">
       <body className={`${maplestoryFont.className} antialiased`}>
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -4,21 +4,25 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@cloudflare/d1": "^1.4.1",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.0",
     "bcrypt-ts": "^7.1.0",
-    "next": "16.0.0",
+    "drizzle-orm": "^0.44.7",
+    "next": "^15.5.2",
     "next-auth": "^5.0.0-beta.29",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
+    "@cloudflare/workers-types": "^4.20251014.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -26,7 +30,7 @@
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "eslint": "^9",
-    "eslint-config-next": "16.0.0",
+    "eslint-config-next": "^15.5.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

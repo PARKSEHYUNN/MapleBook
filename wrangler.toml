@@ -1,0 +1,10 @@
+# wrangler.toml
+
+name = "maplebook"
+compatibility_date = "2025-10-28"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "maplebook-db"
+database_id = "26442747-2390-42e1-921a-f7bd5dfba969"
+preview_database_id = "26442747-2390-42e1-921a-f7bd5dfba969"

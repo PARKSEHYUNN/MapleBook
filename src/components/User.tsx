@@ -36,9 +36,10 @@ export default function User({
   }, [isUserMenuOpen]);
 
   return (
-    <div ref={userMenuRef}>
+    <div ref={userMenuRef} className="flex items-center gap-2">
       <button
         type="button"
+        id="user-button"
         className="w-8 h-8 flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 overflow-hidden"
         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
       >
@@ -106,6 +107,13 @@ export default function User({
           </li>
         </ul>
       </div>
+
+      <label
+        htmlFor="user-button"
+        className="text-sm text-gray-900 dark:text-white font-bold cursor-pointer"
+      >
+        {character.character_name}
+      </label>
     </div>
   );
 }

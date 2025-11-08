@@ -1,9 +1,17 @@
+// src/layout.tsx
+
 import type { Metadata } from "next";
+import Navbar from "@/components/Navbar";
 import localFont from "next/font/local";
 import "./globals.css";
 
 import { auth } from "@/auth";
 import AuthSessionProvider from "./AuthSessionProvider";
+
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+config.autoAddCss = false;
 
 const pretendardFont = localFont({
   src: [
@@ -18,7 +26,7 @@ const pretendardFont = localFont({
 
 export const metadata: Metadata = {
   title: "MapleBook",
-  description: "MapleBook",
+  description: "Search Maplestory Character",
   icons: {
     icon: "/logo.svg",
   },
@@ -34,7 +42,10 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body className={`${pretendardFont.variable} antialiased`}>
-        <AuthSessionProvider session={session}>{children}</AuthSessionProvider>
+        <AuthSessionProvider session={session}>
+          <Navbar />
+          {children}
+        </AuthSessionProvider>
       </body>
     </html>
   );

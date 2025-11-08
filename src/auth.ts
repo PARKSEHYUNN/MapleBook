@@ -18,9 +18,25 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async session({ session, user }) {
-      if (session.user) session.user.id = user.id;
+      if (session.user) {
+        session.user.id = user.id;
+
+        const userWithMainCharacter = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: {
+            mainCharacter: true,
+          },
+        });
+
+        session.user.mainCharacter =
+          userWithMainCharacter?.mainCharacter || null;
+      }
+
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
 };
 

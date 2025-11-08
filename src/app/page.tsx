@@ -33,7 +33,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-gray-800">
       <button onClick={() => signIn("google")}>구글 로그인</button>
     </div>
   );

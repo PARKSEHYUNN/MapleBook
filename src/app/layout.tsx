@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import localFont from "next/font/local";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 import { auth } from "@/auth";
 import AuthSessionProvider from "./AuthSessionProvider";
@@ -41,11 +42,16 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      <body className={`${pretendardFont.variable} antialiased`}>
+      <body
+        className={`${pretendardFont.variable} antialiased flex flex-col min-h-screen bg-white dark:bg-gray-800`}
+      >
         <AuthSessionProvider session={session}>
           <Navbar />
-          {children}
+          <main className="flex-grow w-full md:w-[80%] mx-auto">
+            {children}
+          </main>
         </AuthSessionProvider>
+        <Footer />
       </body>
     </html>
   );

@@ -15,11 +15,13 @@ export const authOptions: AuthOptions = {
   ],
   session: {
     strategy: "database",
+    maxAge: 60 * 60 * 8,
   },
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.termsAgreed = user.termsAgreed;
 
         const userWithMainCharacter = await prisma.user.findUnique({
           where: { id: user.id },

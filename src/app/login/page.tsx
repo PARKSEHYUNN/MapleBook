@@ -34,7 +34,7 @@ export default function LoginPage() {
   const error = ErrorMessage();
 
   return (
-    <div className="min-h-screen flex w-full flex-col items-center justify-start p-5 dark:bg-gray-800">
+    <div className="flex w-full flex-col items-center justify-start p-5 dark:bg-gray-800">
       <h1 className="mb-3 text-2xl font-bold dark:text-white">로그인</h1>
       {error && (
         <span className="bg-red-600 text-white pt-2.5 pb-2.5 ps-5 pe-5 rounded-lg flex items-center mb-3 text-sm">

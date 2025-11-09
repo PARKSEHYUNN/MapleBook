@@ -9,7 +9,12 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      termsAgreed: boolean;
       mainCharacter: Character | null;
     } & DefaultSession["user"];
+  }
+
+  interface User extends DefaultUser {
+    termsAgreed: boolean;
   }
 }

@@ -40,7 +40,7 @@ export default function User() {
     <div ref={userMenuRef} className="flex items-center gap-2">
       <button
         type="button"
-        className="w-8 h-8 flex text-sm bg-white rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 overflow-hidden items-center justify-center border border-gray-300"
+        className="w-8 h-8 flex text-sm bg-gray-100 rounded-full md:me-0 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 overflow-hidden items-center justify-center border border-gray-300 cursor-pointer"
         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
       >
         <span className="sr-only">Open user menu</span>
@@ -96,7 +96,7 @@ export default function User() {
         <ul className="py-2">
           <li>
             <Link
-              href="/dashboard"
+              href="/mypage"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
             >
               내 정보

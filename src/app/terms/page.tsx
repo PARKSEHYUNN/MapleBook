@@ -31,7 +31,8 @@ export default function TermsPage() {
 
     fetch("/privacy.md")
       .then((res) => res.text())
-      .then((text) => setPrivacyMd(text));
+      .then((text) => setPrivacyMd(text))
+      .then(() => console.log(privacyMd));
   }, []);
 
   const handleAgree = async () => {
@@ -185,7 +186,8 @@ export default function TermsPage() {
       <button
         onClick={handleAgree}
         disabled={!isTermsChecked || !isPrivacyChecked || isLoading}
-        className="w-[50%] mt-3 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        // className="w-[50%] mt-3 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        className="w-[50%] mt-3 text-center p-2.5 rounded-lg text-orange-500 bg-transparent border border-orange-500 hover:text-white hover:bg-orange-500 cursor-pointer ring-none disabled:opacity-50 disabled:text-orange-500 disabled:hover:bg-transparent disabled:cursor-default"
       >
         {isLoading ? "처리 중..." : "모두 동의하고 계속하기"}
       </button>

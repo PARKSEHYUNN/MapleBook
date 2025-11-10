@@ -23,6 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = user.id;
         session.user.termsAgreed = (user as User).termsAgreed;
+        session.user.termsAgreedAt = (user as User).termsAgreedAt;
 
         const userWithMainCharacter = await prisma.user.findUnique({
           where: { id: user.id },

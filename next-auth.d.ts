@@ -8,11 +8,13 @@ declare module "next-auth" {
     user: {
       id: string;
       termsAgreed: boolean;
+      termsAgreedAt: Date | null;
       mainCharacter: Character | null;
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     termsAgreed: boolean;
+    termsAgreedAt: Date | null;
   }
 }

@@ -43,11 +43,11 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${pretendardFont.variable} antialiased flex flex-col min-h-screen bg-white dark:bg-gray-800`}
+        className={`${pretendardFont.variable} antialiased flex flex-col min-h-screen bg-white`}
       >
         <AuthSessionProvider session={session}>
           <Navbar />
-          <main className="flex-grow w-full md:w-[80%] mx-auto">
+          <main className="flex-grow w-full md:w-[80%] mx-auto bg-white">
             {children}
           </main>
         </AuthSessionProvider>

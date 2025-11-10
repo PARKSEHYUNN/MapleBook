@@ -40,7 +40,7 @@ export default function User() {
     <div ref={userMenuRef} className="flex items-center gap-2">
       <button
         type="button"
-        className="w-8 h-8 flex text-sm bg-gray-100 rounded-full md:me-0 focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 overflow-hidden items-center justify-center border border-gray-300 cursor-pointer"
+        className="w-8 h-8 flex text-sm bg-gray-100 rounded-full md:me-0 focus:ring-2 focus:ring-gray-300 overflow-hidden items-center justify-center border border-gray-300 cursor-pointer"
         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
       >
         <span className="sr-only">Open user menu</span>
@@ -58,35 +58,35 @@ export default function User() {
         )}
       </button>
       <div
-        className={`z-50 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600 absolute top-12 right-0 min-w-35 ${
+        className={`z-50 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm absolute top-12 right-0 min-w-35 ${
           !isUserMenuOpen && "hidden"
         }`}
       >
         <div className="px-4 py-2">
-          <span className="block text-sm text-gray-900 dark:text-white whitespace-nowrap">
+          <span className="block text-sm text-gray-900 whitespace-nowrap">
             {mainCharacter ? mainCharacter.character_name : "대표 캐릭터 없음"}
           </span>
 
           <div className="flex gap-1 items-center">
-            <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+            <span className="block text-sm text-gray-500 truncate">
               {mainCharacter ? (
                 <WorldIcon worldName={mainCharacter.world_name} />
               ) : (
                 <WorldIcon worldName="default" />
               )}
             </span>
-            <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+            <span className="block text-sm text-gray-500 truncate">
               {mainCharacter ? mainCharacter.world_name : "월드 없음"}
             </span>
           </div>
 
-          <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+          <span className="block text-sm text-gray-500 truncate">
             {mainCharacter
               ? `Lv. ${mainCharacter.character_level} [${mainCharacter.character_exp_rate}%]`
               : ""}
           </span>
 
-          <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+          <span className="block text-sm text-gray-500 truncate">
             {mainCharacter
               ? `${mainCharacter.character_class} / ${mainCharacter.character_class_level}차`
               : ""}
@@ -97,7 +97,7 @@ export default function User() {
           <li>
             <Link
               href="/mypage"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               내 정보
             </Link>
@@ -105,7 +105,7 @@ export default function User() {
           <li>
             <Link
               href="/setting"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             >
               설정
             </Link>
@@ -116,7 +116,7 @@ export default function User() {
             <Link
               href="/"
               onClick={() => signOut()}
-              className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-red-300 dark:hover:text-white"
+              className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
             >
               로그아웃
             </Link>

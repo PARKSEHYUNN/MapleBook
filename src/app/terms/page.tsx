@@ -132,8 +132,8 @@ export default function TermsPage() {
   );
 
   return (
-    <div className="flex w-full flex-col items-center justify-start p-5 dark:bg-gray-800">
-      <h1 className="mb-3 text-2xl font-bold dark:text-white">약관 동의</h1>
+    <div className="flex w-full flex-col items-center justify-start p-5">
+      <h1 className="mb-3 text-2xl font-bold">약관 동의</h1>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">

@@ -34,8 +34,8 @@ export default function LoginPage() {
   const error = ErrorMessage();
 
   return (
-    <div className="flex w-full flex-col items-center justify-start p-5 dark:bg-gray-800">
-      <h1 className="mb-3 text-2xl font-bold dark:text-white">로그인</h1>
+    <div className="flex w-full flex-col items-center justify-start p-5">
+      <h1 className="mb-3 text-2xl font-bold">로그인</h1>
       {error && (
         <span className="bg-red-600 text-white pt-2.5 pb-2.5 ps-5 pe-5 rounded-lg flex items-center mb-3 text-sm">
           <FontAwesomeIcon
@@ -48,7 +48,7 @@ export default function LoginPage() {
       )}
       <div className="mb-3">
         <button
-          className="w-full text-gray-900 dark:text-white bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium rounded-lg text-sm px-5 py-2.5 border border-gray-300 flex cursor-pointer"
+          className="w-full text-gray-900 bg-white hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 border border-gray-300 flex cursor-pointer"
           onClick={() => signIn("google", { callbackUrl: "/" })}
         >
           <Image

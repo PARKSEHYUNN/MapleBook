@@ -79,6 +79,24 @@ export default function MypagePage() {
                     value={session?.user.email as string}
                   />
                 </div>
+
+                <div className="w-full mt-4">
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-900 text-start"
+                  >
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    placeholder="이름"
+                    required
+                    disabled
+                    value={session?.user.name as string}
+                  />
+                </div>
               </div>
             </div>
           )}

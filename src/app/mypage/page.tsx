@@ -4,6 +4,7 @@
 
 import { useHash } from "@/hooks/useHash";
 import { useMemo } from "react";
+import { useSession } from "next-auth/react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +12,7 @@ import {
   faCode,
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
+import Spinner from "@/components/Spinner";
 
 const TABS = [
   { id: "profile", label: "프로필", icon: faCircleUser },
@@ -25,6 +27,8 @@ const getValidTabId = (hash: string) => {
 };
 
 export default function MypagePage() {
+  const { data: session, status } = useSession();
+
   const hash = useHash();
   const activeTab = useMemo(() => {
     return getValidTabId(hash);
@@ -59,7 +63,25 @@ export default function MypagePage() {
               <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
                 프로필
               </h2>
-              이메일 이름 회원탈퇴버튼
+              <div className="w-[60%] mx-auto">
+                <div className="w-full">
+                  <label
+                    htmlFor="email"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-start"
+                  >
+                    이메일
+                  </label>
+                  <input
+                    type="text"
+                    id="email"
+                    className="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="이메일"
+                    required
+                    disabled
+                    value={session?.user.email as string}
+                  />
+                </div>
+              </div>
             </div>
           )}
 

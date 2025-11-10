@@ -1,11 +1,12 @@
 // src/auth.ts
 
-import { AuthOptions, getServerSession } from "next-auth";
+import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
+import { User } from "@prisma/client";
 
-export const authOptions: AuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -21,7 +22,7 @@ export const authOptions: AuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
-        session.user.termsAgreed = user.termsAgreed;
+        session.user.termsAgreed = (user as User).termsAgreed;
 
         const userWithMainCharacter = await prisma.user.findUnique({
           where: { id: user.id },
@@ -40,6 +41,4 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: "/login",
   },
-};
-
-export const auth = () => getServerSession(authOptions);
+});

@@ -31,8 +31,7 @@ export default function TermsPage() {
 
     fetch("/privacy.md")
       .then((res) => res.text())
-      .then((text) => setPrivacyMd(text))
-      .then(() => console.log(privacyMd));
+      .then((text) => setPrivacyMd(text));
   }, []);
 
   const handleAgree = async () => {

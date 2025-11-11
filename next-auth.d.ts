@@ -10,11 +10,13 @@ declare module "next-auth" {
       termsAgreed: boolean;
       termsAgreedAt: Date | null;
       mainCharacter: Character | null;
+      maskedApiKey: string | null;
     } & DefaultSession["user"];
   }
 
   interface User extends DefaultUser {
     termsAgreed: boolean;
     termsAgreedAt: Date | null;
+    encryptedApiKey: string | null;
   }
 }

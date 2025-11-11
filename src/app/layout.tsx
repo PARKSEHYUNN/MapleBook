@@ -42,6 +42,13 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
+      <head>
+        <script
+          type="text/javascript"
+          src="https://openapi.nexon.com/js/analytics.js?app_id=242165"
+          async
+        ></script>
+      </head>
       <body
         className={`${pretendardFont.variable} antialiased flex flex-col min-h-screen bg-white`}
       >

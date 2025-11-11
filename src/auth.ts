@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 import { User } from "@prisma/client";
+import { decrypt, maskApiKey } from "./lib/crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -24,6 +25,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = user.id;
         session.user.termsAgreed = (user as User).termsAgreed;
         session.user.termsAgreedAt = (user as User).termsAgreedAt;
+
+        const encryptedKey = (user as User).encryptedApiKey;
+
+        if (encryptedKey) {
+          try {
+            const decryptedKey = decrypt(encryptedKey);
+            session.user.maskedApiKey = maskApiKey(decryptedKey);
+          } catch (error) {
+            console.error("API Key decryption failed for session:", error);
+            session.user.maskedApiKey = "키 처리 오류";
+          }
+        }
 
         const userWithMainCharacter = await prisma.user.findUnique({
           where: { id: user.id },

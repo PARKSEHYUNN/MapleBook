@@ -1,8 +1,45 @@
 // src/app/user/main-character/route.ts
 
 import { auth } from "@/auth";
+import {
+  notFoundResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from "@/lib/apiResponses";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+
+export async function GET() {
+  try {
+    const session = await auth();
+
+    if (!session || !session.user || !session.user.id)
+      return unauthorizedResponse();
+
+    const mainCharacterId = session.user.mainCharacterId;
+
+    if (!mainCharacterId) return successResponse({ character: null });
+
+    const character = await prisma.character.findUnique({
+      where: { id: mainCharacterId },
+    });
+
+    if (!character) return notFoundResponse("Character Id is undefined");
+
+    const safeCharacter = {
+      ...character,
+      character_exp: character.character_exp?.toString() || null,
+      character_combat_power:
+        character.character_combat_power?.toString() || null,
+    };
+
+    return successResponse({ character: safeCharacter });
+  } catch (error) {
+    console.error("Failed to fetch main character:", error);
+    return serverErrorResponse();
+  }
+}
 
 export async function POST(req: Request) {
   try {

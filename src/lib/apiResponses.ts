@@ -39,5 +39,5 @@ export function serverErrorResponse(message: string = "Internal Server Error") {
  * @param data - 응답에 포함될 데이터
  */
 export function successResponse<T>(data: T) {
-  return NextResponse.json({ success: true, data }, { status: 200 });
+  return NextResponse.json({ success: true, ...data }, { status: 200 });
 }

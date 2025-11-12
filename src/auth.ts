@@ -26,6 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.termsAgreed = (user as User).termsAgreed;
         session.user.termsAgreedAt = (user as User).termsAgreedAt;
 
+        session.user.mainCharacterId = (user as User).mainCharacterId;
+
         const encryptedKey = (user as User).encryptedApiKey;
 
         if (encryptedKey) {
@@ -38,23 +40,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        const userWithMainCharacter = await prisma.user.findUnique({
-          where: { id: user.id },
-          include: {
-            mainCharacter: true,
-          },
-        });
+        // const userWithMainCharacter = await prisma.user.findUnique({
+        //   where: { id: user.id },
+        //   include: {
+        //     mainCharacter: true,
+        //   },
+        // });
 
-        if (userWithMainCharacter?.mainCharacter) {
-          const char = userWithMainCharacter.mainCharacter;
+        // if (userWithMainCharacter?.mainCharacter) {
+        //   const char = userWithMainCharacter.mainCharacter;
 
-          session.user.mainCharacter = {
-            ...char,
-            character_exp: char.character_exp?.toString() || null,
-            character_combat_power:
-              char.character_combat_power?.toString() || null,
-          };
-        } else session.user.mainCharacter = null;
+        //   session.user.mainCharacter = {
+        //     ...char,
+        //     character_exp: char.character_exp?.toString() || null,
+        //     character_combat_power:
+        //       char.character_combat_power?.toString() || null,
+        //   };
+        // } else session.user.mainCharacter = null;
       }
 
       return session;

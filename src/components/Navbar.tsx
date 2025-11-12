@@ -15,7 +15,7 @@ import User from "./User";
 export default function Navbar() {
   const { status, data } = useSession();
 
-  console.log(data);
+  //console.log(data);
 
   const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
   const mainMenuRef = useRef<HTMLDivElement>(null);

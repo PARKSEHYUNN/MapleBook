@@ -6,7 +6,11 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 
-export default function ApiKeyManager() {
+type ApiKeyManagerProps = {
+  onKeyUpdated: () => void;
+};
+
+export default function ApiKeyManager({ onKeyUpdated }: ApiKeyManagerProps) {
   const { data: session, update } = useSession();
 
   const [isApiKeyLoading, setIsApiKeyLoading] = useState(false);
@@ -51,11 +55,20 @@ export default function ApiKeyManager() {
         });
 
         if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || "서버에서 저장에 실패 했습니다.");
+          let errorMessage = "서버에서 저장에 실패 했습니다.";
+
+          try {
+            const errorData = await res.json();
+            if (errorData.error) errorMessage = errorData.error;
+          } catch (jsonError) {
+            console.error("Failed to parse error JSON response:", jsonError);
+          }
+
+          throw new Error(errorMessage);
         }
 
         await update();
+        onKeyUpdated();
 
         Swal.fire({
           title: "저장 완료",
@@ -74,7 +87,7 @@ export default function ApiKeyManager() {
       } finally {
         setIsApiKeyLoading(false);
       }
-    }
+    } else setIsApiKeyLoading(false);
   };
 
   return (
@@ -102,7 +115,7 @@ export default function ApiKeyManager() {
               type="button"
               onClick={handleApiKey}
               disabled={isApiKeyLoading}
-              className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-orange-500 bg-white rounded-e-lg border-orange-500 hover:bg-orange-500 hover:text-white focus:ring-none focus:outline-none cursor-pointer disabled:opacity-50 disabled:text-orange-500 disabled:hover:bg-white disabled:cursor-default"
+              className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-orange-500 border border-orange-500 bg-white rounded-e-lg border-orange-500 hover:bg-orange-500 hover:text-white focus:ring-none focus:outline-none cursor-pointer disabled:opacity-50 disabled:text-orange-500 disabled:hover:bg-white disabled:cursor-default"
             >
               {isApiKeyLoading
                 ? "처리 중..."

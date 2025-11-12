@@ -9,13 +9,51 @@ import WorldIcon from "./WorldIcon";
 import { useSession, signOut } from "next-auth/react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faSpinner, faUser } from "@fortawesome/free-solid-svg-icons";
+
+type MainCharacter = {
+  ocid: string;
+  character_name: string;
+  world_name: string;
+  character_class: string;
+  character_level: number;
+  character_image: string | null;
+  character_exp_rate: number | null;
+  character_class_level: string | null;
+};
 
 export default function User() {
   const { data: session, status } = useSession();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const [mainCharacter, setMainCharacter] = useState<MainCharacter | null>(
+    null
+  );
+  const [isFetching, setIsFetching] = useState(false);
+  const isLoading = status === "loading" || isFetching;
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsFetching(true);
+
+      fetch("/api/user/main-character")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.character) setMainCharacter(data.character);
+          else setMainCharacter(null);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch user character", error);
+          setMainCharacter(null);
+        })
+        .finally(() => setIsFetching(false));
+    } else if (status === "unauthenticated") {
+      setMainCharacter(null);
+    }
+  }, [status]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +72,41 @@ export default function User() {
     };
   }, [isUserMenuOpen]);
 
-  const mainCharacter = session?.user.mainCharacter;
+  //const mainCharacter = session?.user.mainCharacter;
+
+  const renderCharacterImage = () => {
+    if (isLoading) {
+      return (
+        <FontAwesomeIcon
+          icon={faSpinner}
+          spin
+          className="text-gray-600 h-5 w-5"
+        />
+      );
+    }
+    if (mainCharacter && mainCharacter.character_image) {
+      return (
+        <Image
+          src={mainCharacter.character_image}
+          alt={mainCharacter.character_name}
+          width={32}
+          height={32}
+          className="rounded-full scale-[5.5] translate-x-0.5 translate-y-0 bg-white"
+          unoptimized={true}
+        />
+      );
+    }
+    return (
+      <Image
+        src="/default.png"
+        alt="default"
+        width={32}
+        height={32}
+        className="rounded-full scale-[5.5] translate-x-0.5 translate-y-0 bg-white"
+        unoptimized={true}
+      />
+    );
+  };
 
   return (
     <div ref={userMenuRef} className="flex items-center gap-2">
@@ -42,20 +114,10 @@ export default function User() {
         type="button"
         className="w-8 h-8 flex text-sm bg-gray-100 rounded-full md:me-0 focus:ring-2 focus:ring-gray-300 overflow-hidden items-center justify-center border border-gray-300 cursor-pointer"
         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+        disabled={isLoading}
       >
         <span className="sr-only">Open user menu</span>
-        {mainCharacter ? (
-          <Image
-            src={mainCharacter.character_image!}
-            alt={mainCharacter.character_name}
-            width={32}
-            height={32}
-            className="rounded-full scale-[5.5] translate-x-0.5 translate-y-0 bg-white"
-            unoptimized={true}
-          />
-        ) : (
-          <FontAwesomeIcon icon={faUser} className="text-gray-600 h-5 w-5" />
-        )}
+        {renderCharacterImage()}
       </button>
       <div
         className={`z-50 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm absolute top-12 right-0 min-w-35 ${
@@ -63,34 +125,35 @@ export default function User() {
         }`}
       >
         <div className="px-4 py-2">
-          <span className="block text-sm text-gray-900 whitespace-nowrap">
-            {mainCharacter ? mainCharacter.character_name : "대표 캐릭터 없음"}
-          </span>
-
-          <div className="flex gap-1 items-center">
-            <span className="block text-sm text-gray-500 truncate">
-              {mainCharacter ? (
-                <WorldIcon worldName={mainCharacter.world_name} />
-              ) : (
-                <WorldIcon worldName="default" />
-              )}
+          {isLoading ? (
+            <span className="block text-sm text-gray-900 whitespace-nowrap">
+              불러오는 중...
             </span>
-            <span className="block text-sm text-gray-500 truncate">
-              {mainCharacter ? mainCharacter.world_name : "월드 없음"}
+          ) : mainCharacter ? (
+            <>
+              <span className="block text-sm text-gray-900 whitespace-nowrap">
+                {mainCharacter.character_name}
+              </span>
+              <div className="flex gap-1 items-center">
+                <span className="block text-sm text-gray-500 truncate">
+                  <WorldIcon worldName={mainCharacter.world_name} />
+                </span>
+                <span className="block text-sm text-gray-500 truncate">
+                  {mainCharacter.world_name}
+                </span>
+              </div>
+              <span className="block text-sm text-gray-500 truncate">
+                {`Lv. ${mainCharacter.character_level} [${mainCharacter.character_exp_rate}%]`}
+              </span>
+              <span className="block text-sm text-gray-500 truncate">
+                {`${mainCharacter.character_class} / ${mainCharacter.character_class_level}차`}
+              </span>
+            </>
+          ) : (
+            <span className="block text-sm text-gray-900 whitespace-nowrap">
+              대표 캐릭터 없음
             </span>
-          </div>
-
-          <span className="block text-sm text-gray-500 truncate">
-            {mainCharacter
-              ? `Lv. ${mainCharacter.character_level} [${mainCharacter.character_exp_rate}%]`
-              : ""}
-          </span>
-
-          <span className="block text-sm text-gray-500 truncate">
-            {mainCharacter
-              ? `${mainCharacter.character_class} / ${mainCharacter.character_class_level}차`
-              : ""}
-          </span>
+          )}
         </div>
 
         <ul className="py-2">

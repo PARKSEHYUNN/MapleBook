@@ -1,12 +1,18 @@
 // src/app/api/user/api-key/route.ts
 
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
-import { badRequestResponse, unauthorizedResponse } from "@/lib/apiResponses";
+import {
+  badRequestResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from "@/lib/apiResponses";
 import { encrypt } from "@/lib/crypto";
 import { createHmac } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { Client } from "@upstash/qstash";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 interface NexonCharacterBasic {
   ocid: string;
@@ -31,13 +37,13 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
 
-    if(!session || !session.user || !session.user.id)
+    if (!session || !session.user || !session.user.id)
       return unauthorizedResponse();
 
     const userId = session.user.id;
-    const {apiKey} = await req.json();
+    const { apiKey } = await req.json();
 
-    if(!apiKey || typeof apiKey !== "string")
+    if (!apiKey || typeof apiKey !== "string")
       return badRequestResponse("Invalid API Key");
 
     // API 키 검증
@@ -47,13 +53,12 @@ export async function POST(req: Request) {
         method: "GET",
         headers: {
           accept: "application/json",
-          "x-nxopen-api-key": apiKey
-        }
+          "x-nxopen-api-key": apiKey,
+        },
       }
-    )
+    );
 
-    if(!res.ok)
-      return badRequestResponse("Invalid API Key");
+    if (!res.ok) return badRequestResponse("Invalid API Key");
 
     const data = (await res.json()) as NexonCharacterListResponse;
     const characterData = data["account_list"].flatMap(
@@ -62,8 +67,8 @@ export async function POST(req: Request) {
 
     const encryptedKey = encrypt(apiKey);
     const hashKey = createHmac("sha256", env.API_HASHING_SECRET)
-    .update(apiKey)
-    .digest("hex");
+      .update(apiKey)
+      .digest("hex");
 
     const highLevelCharacters = characterData.filter(
       (char) => char.character_level >= MIN_LEVEL_FOR_TRACKING
@@ -73,7 +78,7 @@ export async function POST(req: Request) {
 
     operations.push(
       prisma.user.update({
-        where: {id: userId},
+        where: { id: userId },
         data: {
           encryptedApiKey: encryptedKey,
           apiKeyHash: hashKey,
@@ -84,17 +89,23 @@ export async function POST(req: Request) {
     );
 
     for (const char of highLevelCharacters) {
-      const worldCheck = char.world_name === "리부트" ? "에오스" : char.world_name === "리부트2" ? "핼리오스" : char.world_name;
+      const worldCheck =
+        char.world_name === "리부트"
+          ? "에오스"
+          : char.world_name === "리부트2"
+          ? "핼리오스"
+          : char.world_name;
 
       operations.push(
         prisma.character.upsert({
-          where: {ocid: char.ocid},
+          where: { ocid: char.ocid },
           update: {
             userId: userId,
             character_name: char.character_name,
             world_name: worldCheck,
             character_class: char.character_class,
             character_level: char.character_level,
+            status: "PENDING",
           },
           create: {
             userId: userId,
@@ -104,11 +115,31 @@ export async function POST(req: Request) {
             character_class: char.character_class,
             character_level: char.character_level,
           },
-          select: {ocid: true}
+          select: { ocid: true },
         })
       );
     }
 
     await prisma.$transaction(operations);
+
+    const qstashClient = new Client({
+      baseUrl: env.QSTASH_URL,
+      token: env.QSTASH_TOKEN,
+    });
+
+    await qstashClient.publishJSON({
+      url: `${env.APP_URL}/api/worker/enqueue-character-updates`,
+      body: { userId: userId },
+      delay: 1,
+    });
+
+    return successResponse({});
+  } catch (error) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002")
+        return badRequestResponse("Duplicate API Key");
+    }
+
+    return serverErrorResponse();
   }
 }

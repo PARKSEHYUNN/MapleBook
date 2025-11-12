@@ -16,6 +16,7 @@ export async function GET() {
     const characters = await prisma.character.findMany({
       where: { userId: userId },
       select: {
+        id: true,
         ocid: true,
         character_name: true,
         world_name: true,

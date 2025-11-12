@@ -14,7 +14,7 @@ import {
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import Profile from "@/components/mypage/Profile";
-import NexonApiKey from "@/components/mypage/NexonApiKey2";
+import NexonApiKey from "@/components/mypage/NexonApiKey";
 
 const TABS = [
   { id: "profile", label: "프로필", icon: faCircleUser },
@@ -62,9 +62,7 @@ export default function MypagePage() {
         <div className="p-6 bg-gray-50 text-medium text-gray-900 rounded-lg w-full md:w-3/4 text-center">
           {activeTab === "profile" && <Profile session={session} />}
 
-          {activeTab === "nexonapikey" && (
-            <NexonApiKey session={session} update={update} />
-          )}
+          {activeTab === "nexonapikey" && <NexonApiKey />}
 
           {activeTab === "login" && (
             <div>

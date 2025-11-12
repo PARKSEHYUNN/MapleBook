@@ -17,7 +17,7 @@ declare module "next-auth" {
       id: string;
       termsAgreed: boolean;
       termsAgreedAt: Date | null;
-      mainCharacter: JsonSafeCharacter | null;
+      mainCharacterId: string | null;
       maskedApiKey: string | null;
     } & DefaultSession["user"];
   }

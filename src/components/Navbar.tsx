@@ -13,7 +13,9 @@ import { faBars } from "@fortawesome/free-solid-svg-icons";
 import User from "./User";
 
 export default function Navbar() {
-  const { status } = useSession();
+  const { status, data } = useSession();
+
+  console.log(data);
 
   const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
   const mainMenuRef = useRef<HTMLDivElement>(null);

@@ -16,7 +16,7 @@ export const WORLD_NAME_MAP = {
   엘리시움: "elysium",
   이노시스: "enosis",
   에오스: "eos",
-  헬리오스: "helios",
+  핼리오스: "helios",
   루나: "luna",
   노바: "nova",
   레드: "red",

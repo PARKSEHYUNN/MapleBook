@@ -79,6 +79,7 @@ model Character {
   character_class                     String
   character_class_level               String?
   character_level                     Int
+
   character_exp                       BigInt?
   character_exp_rate                  Float?
   character_guild_name                String?
@@ -87,7 +88,7 @@ model Character {
   access_flag                         Boolean?
   liberation_quest_clear              Int?
   character_popularity                Int?
-  character_combat_power              Int?
+  character_combat_power              BigInt?
   raw_stat                            Json?
   raw_hyper_stat                      Json?
   raw_propensity                      Json?
@@ -107,6 +108,8 @@ model Character {
   raw_dojang                          Json?
   raw_other_stat                      Json?
   raw_ring_exchange_skill_equipment   Json?
+
+  status                              String    @default("PENDING") // PENDING, ACTIVE, INACTIVE, FAILED
 
   userId                              String?
   user                                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -11,8 +11,13 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "avatar.maplestory.nexon.com",
       },
+      {
+        protocol: "https",
+        hostname: "open.api.nexon.com",
+      },
     ],
   },
+  allowedDevOrigins: ["maplebook.site"],
 };
 
 export default nextConfig;

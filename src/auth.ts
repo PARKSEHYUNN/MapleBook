@@ -45,8 +45,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         });
 
-        session.user.mainCharacter =
-          userWithMainCharacter?.mainCharacter || null;
+        if (userWithMainCharacter?.mainCharacter) {
+          const char = userWithMainCharacter.mainCharacter;
+
+          session.user.mainCharacter = {
+            ...char,
+            character_exp: char.character_exp?.toString() || null,
+            character_combat_power:
+              char.character_combat_power?.toString() || null,
+          };
+        } else session.user.mainCharacter = null;
       }
 
       return session;

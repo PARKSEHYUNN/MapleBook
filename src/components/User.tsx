@@ -46,11 +46,11 @@ export default function User() {
         <span className="sr-only">Open user menu</span>
         {mainCharacter ? (
           <Image
-            src={mainCharacter.character_image}
+            src={mainCharacter.character_image!}
             alt={mainCharacter.character_name}
             width={32}
             height={32}
-            className="rounded-full scale-[3.5] translate-x-0.5 translate-y-0 bg-white"
+            className="rounded-full scale-[5.5] translate-x-0.5 translate-y-0 bg-white"
             unoptimized={true}
           />
         ) : (

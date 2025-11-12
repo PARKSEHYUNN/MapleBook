@@ -1,13 +1,12 @@
 // src/app/api/user/api-key/route.ts
 
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-import { encrypt } from "@/lib/crypto";
 import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
+import { badRequestResponse, unauthorizedResponse } from "@/lib/apiResponses";
+import { encrypt } from "@/lib/crypto";
 import { createHmac } from "crypto";
-import { Prisma } from "@prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Client } from "@upstash/qstash";
+import { prisma } from "@/lib/prisma";
 
 interface NexonCharacterBasic {
   ocid: string;
@@ -26,21 +25,20 @@ interface NexonCharacterListResponse {
   account_list: NexonAccount[];
 }
 
-const MIN_LEVEL_FOR_TRACKING = 0;
+const MIN_LEVEL_FOR_TRACKING = 250;
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
 
-    if (!session || !session.user || !session.user.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if(!session || !session.user || !session.user.id)
+      return unauthorizedResponse();
 
     const userId = session.user.id;
+    const {apiKey} = await req.json();
 
-    const { apiKey } = await req.json();
-
-    if (!apiKey || typeof apiKey !== "string")
-      return NextResponse.json({ error: "Invalid API Key" }, { status: 400 });
+    if(!apiKey || typeof apiKey !== "string")
+      return badRequestResponse("Invalid API Key");
 
     // API 키 검증
     const res = await fetch(
@@ -49,15 +47,13 @@ export async function POST(req: Request) {
         method: "GET",
         headers: {
           accept: "application/json",
-          "x-nxopen-api-key": apiKey,
-        },
+          "x-nxopen-api-key": apiKey
+        }
       }
-    );
-    if (!res.ok)
-      return NextResponse.json(
-        { error: "유효하지 않은 API 키 입니다." },
-        { status: 409 }
-      );
+    )
+
+    if(!res.ok)
+      return badRequestResponse("Invalid API Key");
 
     const data = (await res.json()) as NexonCharacterListResponse;
     const characterData = data["account_list"].flatMap(
@@ -65,27 +61,22 @@ export async function POST(req: Request) {
     );
 
     const encryptedKey = encrypt(apiKey);
-
-    const hashSecret = process.env.API_HASHING_SECRET;
-    if (!hashSecret) throw new Error("API_HASHING_SECRET is not set");
-
-    const apiKeyHash = createHmac("sha256", hashSecret)
-      .update(apiKey)
-      .digest("hex");
+    const hashKey = createHmac("sha256", env.API_HASHING_SECRET)
+    .update(apiKey)
+    .digest("hex");
 
     const highLevelCharacters = characterData.filter(
       (char) => char.character_level >= MIN_LEVEL_FOR_TRACKING
     );
 
-    // API 키 업데이트 및 캐릭터 추가
     const operations = [];
 
     operations.push(
       prisma.user.update({
-        where: { id: userId },
+        where: {id: userId},
         data: {
           encryptedApiKey: encryptedKey,
-          apiKeyHash: apiKeyHash,
+          apiKeyHash: hashKey,
           charactersLastFetchedAt: new Date(),
         },
         select: { id: true },
@@ -93,16 +84,11 @@ export async function POST(req: Request) {
     );
 
     for (const char of highLevelCharacters) {
-      const worldCheck =
-        char.world_name === "리부트"
-          ? "에오스"
-          : char.world_name === "리부트2"
-          ? "핼리오스"
-          : char.world_name;
+      const worldCheck = char.world_name === "리부트" ? "에오스" : char.world_name === "리부트2" ? "핼리오스" : char.world_name;
 
       operations.push(
         prisma.character.upsert({
-          where: { ocid: char.ocid },
+          where: {ocid: char.ocid},
           update: {
             userId: userId,
             character_name: char.character_name,
@@ -118,42 +104,11 @@ export async function POST(req: Request) {
             character_class: char.character_class,
             character_level: char.character_level,
           },
-          select: { ocid: true },
+          select: {ocid: true}
         })
       );
     }
 
     await prisma.$transaction(operations);
-
-    const qstashClient = new Client({
-      baseUrl: process.env.QSTASH_URL!,
-      token: process.env.QSTASH_TOKEN!,
-    });
-
-    let delayInSeconds = 1;
-    for (const char of highLevelCharacters) {
-      await qstashClient.publishJSON({
-        url: `${process.env.APP_URL}/api/worker/process-character`,
-        body: { ocid: char.ocid, userId: userId },
-        delay: delayInSeconds,
-      });
-      delayInSeconds += 1;
-    }
-
-    return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        return NextResponse.json(
-          { error: "이 API 키는 이미 다른 계정에서 사용 중 입니다." },
-          { status: 409 }
-        );
-      }
-    }
-    console.error("Error saving API Key", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
   }
 }

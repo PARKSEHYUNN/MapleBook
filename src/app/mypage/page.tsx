@@ -6,8 +6,6 @@ import { useHash } from "@/hooks/useHash";
 import { useMemo, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
-import Swal from "sweetalert2";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleUser,
@@ -15,8 +13,8 @@ import {
   faMagnifyingGlass,
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import Profile from "@/components/Mypage/Profile";
-import NexonApiKey from "@/components/Mypage/NexonApiKey";
+import Profile from "@/components/mypage/Profile";
+import NexonApiKey from "@/components/mypage/NexonApiKey2";
 
 const TABS = [
   { id: "profile", label: "프로필", icon: faCircleUser },

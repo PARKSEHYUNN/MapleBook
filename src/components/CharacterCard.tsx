@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faExclamationTriangle,
   faSpinner,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import RelativeTimeDisplay from "./RelativeTimeDisplay";
 
 type CharacterInfo = Pick<
   Character,
@@ -19,6 +19,7 @@ type CharacterInfo = Pick<
   | "character_level"
   | "character_image"
   | "status"
+  | "lastFetchedAt"
 >;
 
 interface CharacterCardProps {
@@ -37,6 +38,8 @@ export default function CharacterCard({
 
   const isDisabled =
     character.status === "PENDING" || character.status === "FAILED";
+
+  console.log(character);
 
   return (
     <div
@@ -77,6 +80,10 @@ export default function CharacterCard({
         </div>
       )}
       <div className="h-40 w-full relative overflow-hidden rounded-t-lg bg-gray-200">
+        <span className="absolute text-gray-900 z-50 top-0 left-0 text-xs ms-2 mt-1">
+          최근 업데이트:{" "}
+          <RelativeTimeDisplay timestamp={character.lastFetchedAt} />
+        </span>
         <Image
           src={characterImage}
           alt={character.character_name}

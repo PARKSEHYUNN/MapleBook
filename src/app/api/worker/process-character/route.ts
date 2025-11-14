@@ -191,6 +191,8 @@ export async function POST(req: Request) {
         raw_other_stat: results["other-stat"] || {},
         raw_ring_exchange_skill_equipment:
           results["ring-exchange-skill-equipment"] || {},
+
+        lastFetchedAt: new Date(),
       },
     });
 

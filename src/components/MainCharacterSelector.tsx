@@ -9,6 +9,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useMemo,
+  useCallback,
 } from "react";
 import { useSession } from "next-auth/react";
 import { Character } from "@prisma/client";
@@ -16,7 +17,8 @@ import CharacterCard from "./CharacterCard";
 import WorldSelecter from "./WorldSelecter";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import MainCharacterRefresh from "./MainCharacterRefresh";
 
 export type MainCharacterSelectorHandle = {
   fetchCharacters: () => Promise<void>;
@@ -31,6 +33,7 @@ type CharacterInfo = Pick<
   | "character_level"
   | "character_image"
   | "status"
+  | "lastFetchedAt"
 > & {
   id: string;
 };
@@ -44,6 +47,7 @@ export default forwardRef<MainCharacterSelectorHandle, {}>(
     const [worldList, setWorldList] = useState<string[]>([]);
     const [currentWorld, setCurrentWorld] = useState("");
     const [isLoadingList, setisLoadingList] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedOcid, setSelectedOcid] = useState<string | null>(() => {
       if (!session?.user?.mainCharacterId || characterList.length === 0)
         return null;
@@ -53,6 +57,8 @@ export default forwardRef<MainCharacterSelectorHandle, {}>(
       );
     });
     const [isMainCharLoading, setIsMainCharLoading] = useState(false);
+    const initialStaleCheckDone = useRef(false);
+    const HOUR_MS = 1000 * 60 * 60;
 
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -174,15 +180,63 @@ export default forwardRef<MainCharacterSelectorHandle, {}>(
       return char.world_name === currentWorld;
     });
 
+    const handleRefresh = useCallback(async () => {
+      if (isRefreshing) return;
+      setIsRefreshing(true);
+
+      try {
+        const res = await fetch("/api/user/characters/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "갱신에 실패 했습니다.");
+
+        await fetchCharacters();
+
+        await update();
+      } catch (error: unknown) {
+        let errorMessage = "알 수 없는 오류가 발생했습니다.";
+        if (error instanceof Error) errorMessage = error.message;
+        Swal.fire("오류", errorMessage, "error");
+      } finally {
+        setIsRefreshing(false);
+      }
+    }, [isRefreshing, fetchCharacters]);
+
+    const lastFetchedAt = useMemo(() => {
+      if (!session?.user?.charactersLastFetchedAt) return null;
+      return new Date(session.user.charactersLastFetchedAt);
+    }, [session?.user?.charactersLastFetchedAt]);
+
+    useEffect(() => {
+      if (lastFetchedAt && !initialStaleCheckDone.current && !isRefreshing) {
+        initialStaleCheckDone.current = true;
+
+        const now = Date.now();
+        const diffMs = now - lastFetchedAt.getTime();
+
+        if (diffMs > HOUR_MS) handleRefresh();
+      }
+    }, [lastFetchedAt, isRefreshing, handleRefresh]);
+
     return (
       <div className="w-full mt-5">
         <div className="w-[80%] mx-auto pt-5 border-t border-gray-300">
           <h2 className="text-xl font-bold mb-3">대표 캐릭터 선택</h2>
-          <WorldSelecter
-            list={worldList}
-            selectedWorld={currentWorld || "전체"}
-            onSelectWorld={setCurrentWorld}
-          />
+          <div className="flex justify-between items-center relative">
+            <MainCharacterRefresh
+              onClick={handleRefresh}
+              isLoading={isRefreshing}
+              lastUpdated={lastFetchedAt}
+            />
+            <WorldSelecter
+              list={worldList}
+              selectedWorld={currentWorld || "전체"}
+              onSelectWorld={setCurrentWorld}
+            />
+          </div>
         </div>
 
         <div className="w-[90%] mx-auto">

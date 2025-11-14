@@ -27,6 +27,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.termsAgreedAt = (user as User).termsAgreedAt;
 
         session.user.mainCharacterId = (user as User).mainCharacterId;
+        session.user.charactersLastFetchedAt = (
+          user as User
+        ).charactersLastFetchedAt;
 
         const encryptedKey = (user as User).encryptedApiKey;
 

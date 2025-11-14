@@ -26,7 +26,7 @@ interface NexonCharacterListResponse {
   account_list: NexonAccount[];
 }
 
-const MIN_LEVEL_FOR_TRACKING = 0;
+const MIN_LEVEL_FOR_TRACKING = 250;
 
 export async function POST(req: Request) {
   try {

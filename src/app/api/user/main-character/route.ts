@@ -37,7 +37,7 @@ export async function GET() {
     return successResponse({ character: safeCharacter });
   } catch (error) {
     console.error("Failed to fetch main character:", error);
-    return serverErrorResponse();
+    return serverErrorResponse("Internal Server Error");
   }
 }
 

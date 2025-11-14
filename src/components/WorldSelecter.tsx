@@ -40,10 +40,7 @@ export default function WorldSelecter({
   }, [isWorldSelecterOpen]);
 
   return (
-    <div
-      className="flex justify-end items-center relative"
-      ref={worldSelecterRef}
-    >
+    <div ref={worldSelecterRef}>
       <div
         className="px-3 py-2 m-2 flex justify-center items-center gap-1 bg-white rounded-4xl shadow-md cursor-pointer text-sm "
         onClick={() => setIsWorldSelecterOpen(!isWorldSelecterOpen)}

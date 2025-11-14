@@ -110,6 +110,7 @@ model Character {
   raw_ring_exchange_skill_equipment   Json?
 
   status                              String    @default("PENDING") // PENDING, ACTIVE, INACTIVE, FAILED
+  lastFetchedAt                       DateTime?
 
   userId                              String?
   user                                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)

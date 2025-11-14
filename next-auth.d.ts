@@ -19,6 +19,7 @@ declare module "next-auth" {
       termsAgreedAt: Date | null;
       mainCharacterId: string | null;
       maskedApiKey: string | null;
+      charactersLastFetchedAt: Date | null;
     } & DefaultSession["user"];
   }
 

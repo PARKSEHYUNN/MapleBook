@@ -24,6 +24,7 @@ export async function GET() {
         character_level: true,
         character_image: true,
         status: true,
+        lastFetchedAt: true,
       },
       orderBy: {
         character_level: "desc",

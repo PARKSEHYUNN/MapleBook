@@ -58,6 +58,6 @@ export async function POST(req: Request) {
 
     console.error(`[EnqueueWorker] Error for userId ${userId}:`, errorMessage);
 
-    return serverErrorResponse(errorMessage);
+    return serverErrorResponse(errorMessage || "");
   }
 }

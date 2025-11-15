@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 import { User } from "@prisma/client";
 import { decrypt, maskApiKey } from "./lib/crypto";
+import { headers } from "next/headers";
+import { UAParser } from "ua-parser-js";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -67,5 +69,46 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/login",
+  },
+  events: {
+    async signIn({ user }) {
+      if (user.id) {
+        try {
+          const headerMap = headers();
+          const userAgent = (await headerMap).get("user-agent") || undefined;
+
+          const ip =
+            (await headerMap).get("x-forwarded-for") ??
+            (await headerMap).get("cf-connecting-ip") ??
+            "Unknown";
+
+          let browserName: string | undefined;
+          let osName: string | undefined;
+
+          if (userAgent) {
+            const { browser, os } = UAParser(userAgent);
+            browserName = browser.name;
+            osName = os.name;
+          }
+
+          await prisma.loginHistory.create({
+            data: {
+              userId: user.id,
+              ip: ip,
+              userAgent: userAgent,
+              browser: browserName,
+              os: osName,
+            },
+          });
+        } catch (error) {
+          await prisma.loginHistory.create({
+            data: {
+              userId: user.id,
+              userAgent: "Error parsing headers",
+            },
+          });
+        }
+      }
+    },
   },
 });

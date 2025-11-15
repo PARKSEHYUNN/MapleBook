@@ -30,11 +30,17 @@ model Account {
 }
 
 model Session {
-  id            String  @id @default(cuid())
-  sessionToken  String  @unique
+  id            String    @id @default(cuid())
+  sessionToken  String    @unique
   userId        String
   expires       DateTime
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createAt      DateTime  @default(now())
+  ip            String?
+  userAgent     String?
+  browser       String?
+  os            String?
 }
 
 model User {
@@ -45,6 +51,7 @@ model User {
   image                   String?
   accounts                Account[]
   sessions                Session[]
+  loginHistory            LoginHistory[]
       
   termsAgreed             Boolean   @default(false)
   termsAgreedAt           DateTime?
@@ -58,6 +65,18 @@ model User {
 
   mainCharacterId         String?     @unique
   mainCharacter           Character?  @relation("MainCharacter", fields: [mainCharacterId], references: [id], onDelete: SetNull)
+}
+
+model LoginHistory {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  loginAt   DateTime  @default(now())
+  ip        String?
+  browser   String?
+  os        String?
+  userAgent String?
 }
 
 model VerificationToken {

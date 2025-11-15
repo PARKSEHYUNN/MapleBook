@@ -15,6 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Profile from "@/components/mypage/Profile";
 import NexonApiKey from "@/components/mypage/NexonApiKey";
+import LoginHistory from "@/components/mypage/LoginHistory";
 
 const TABS = [
   { id: "profile", label: "프로필", icon: faCircleUser },
@@ -60,16 +61,11 @@ export default function MypagePage() {
         </ul>
 
         <div className="p-6 bg-gray-50 text-medium text-gray-900 rounded-lg w-full md:w-3/4 text-center">
-          {activeTab === "profile" && <Profile session={session} />}
+          {activeTab === "profile" && <Profile />}
 
           {activeTab === "nexonapikey" && <NexonApiKey />}
 
-          {activeTab === "login" && (
-            <div>
-              <h2 className="text-xl font-bold mb-3">로그인 기록</h2>
-              <p>로그인 기록 콘텐츠가 여기에 표시됩니다.</p>
-            </div>
-          )}
+          {activeTab === "login" && <LoginHistory />}
         </div>
       </div>
     </div>

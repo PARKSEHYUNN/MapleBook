@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 import { Session } from "next-auth";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 
-type ProfileProp = {
-  session: Session | null;
-};
-
-export default function Profile({ session }: ProfileProp) {
+export default function Profile() {
+  const { data: session } = useSession();
   const [isWithdrawLoading, setIsWithdrawLoading] = useState(false);
 
   const agreedAt = session?.user?.termsAgreedAt;

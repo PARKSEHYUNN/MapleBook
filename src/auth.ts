@@ -100,6 +100,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               os: osName,
             },
           });
+
+          const session = await prisma.session.findFirst({
+            where: { userId: user.id },
+            orderBy: { expires: "desc" },
+          });
+
+          if (session) {
+            await prisma.session.update({
+              where: { id: session.id },
+              data: {
+                ip: ip || "Unknown",
+                userAgent: userAgent || "Unknown",
+                browser: browserName || "Unknown",
+                os: osName || "Unknown",
+              },
+            });
+          }
         } catch (error) {
           await prisma.loginHistory.create({
             data: {

@@ -16,7 +16,7 @@ const getPaginationRange = (
   visiblePages = 5
 ) => {
   let start = Math.max(1, currentPage - Math.floor(visiblePages / 2));
-  let end = Math.min(totalPages, start + visiblePages - 1);
+  const end = Math.min(totalPages, start + visiblePages - 1);
 
   start = Math.max(1, end - visiblePages + 1);
 

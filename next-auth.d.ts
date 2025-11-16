@@ -13,6 +13,7 @@ type JsonSafeCharacter = Omit<
 
 declare module "next-auth" {
   interface Session {
+    sessionToken: string;
     user: {
       id: string;
       termsAgreed: boolean;

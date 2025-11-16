@@ -1,6 +1,7 @@
 // src/components/mypage/LoginHistory.tsx
 
 import LoginHistoryComponents from "../LoginHistoryComponents";
+import LoginManager from "../LoginManager";
 
 export default function LoginHistory() {
   return (
@@ -8,6 +9,7 @@ export default function LoginHistory() {
       <h2 className="text-xl font-bold mb-3 text-gray-900">로그인 기록</h2>
 
       <LoginHistoryComponents />
+      <LoginManager />
     </div>
   );
 }

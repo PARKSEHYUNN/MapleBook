@@ -122,6 +122,13 @@ export async function POST(req: Request) {
       "6",
     ];
 
+    const union_endpoints = [
+      "union",
+      "union-raider",
+      "union-artifact",
+      "union-champion",
+    ];
+
     const fetchPromises = endpoints.map((endpoint) =>
       fetch(`${baseUrl}/character/${endpoint}?ocid=${ocid}`, { headers })
         .then((res) => (res.ok ? res.json() : { error: `Failed ${endpoint}` }))
@@ -140,8 +147,17 @@ export async function POST(req: Request) {
         .catch((err) => ({ grade, data: { error: `Fetch error ${err}` } }))
     );
 
+    const fetchUnionPromises = union_endpoints.map((endpoint) =>
+      fetch(`${baseUrl}/user/${endpoint}?ocid=${ocid}`, { headers })
+        .then((res) =>
+          res.ok ? res.json() : { error: `Failed union ${endpoint}` }
+        )
+        .catch((err) => ({ error: `Fetch union error ${endpoint}` }))
+    );
+
     const resultsArray = await Promise.all(fetchPromises);
     const skillResultsArray = await Promise.all(skillFetchPromises);
+    const unionResultArray = await Promise.all(fetchUnionPromises);
 
     const results: Record<string, unknown> = {};
     endpoints.forEach((endpoint, index) => {
@@ -153,6 +169,10 @@ export async function POST(req: Request) {
       combinedSkillData[skillResult.grade] = skillResult.data;
     });
     results["skill"] = combinedSkillData;
+
+    union_endpoints.forEach((endpoint, index) => {
+      results[endpoint] = unionResultArray[index];
+    });
 
     await prisma.character.update({
       where: { ocid: ocid },
@@ -191,6 +211,11 @@ export async function POST(req: Request) {
         raw_other_stat: results["other-stat"] || {},
         raw_ring_exchange_skill_equipment:
           results["ring-exchange-skill-equipment"] || {},
+
+        raw_union: results["union"] || {},
+        raw_union_raider: results["union-raider"] || {},
+        raw_union_artifact: results["union-artifact"] || {},
+        raw_union_champion: results["union-champion"] || {},
 
         lastFetchedAt: new Date(),
       },

@@ -12,7 +12,17 @@ import AuthSessionProvider from "./AuthSessionProvider";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
 config.autoAddCss = false;
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
 
 const pretendardFont = localFont({
   src: [
@@ -23,6 +33,12 @@ const pretendardFont = localFont({
     },
   ],
   variable: "--font-pretendard",
+});
+
+const galmuriFont = localFont({
+  src: "./fonts/Galmuri14.woff2",
+  display: "swap",
+  variable: "--galmuri",
 });
 
 export const metadata: Metadata = {
@@ -50,11 +66,11 @@ export default async function RootLayout({
         ></script>
       </head>
       <body
-        className={`${pretendardFont.variable} antialiased flex flex-col min-h-screen bg-white`}
+        className={`${pretendardFont.variable} ${galmuriFont.variable} antialiased flex flex-col min-h-screen bg-white bg-[url('/background.png')] bg-cover`} //
       >
         <AuthSessionProvider session={session}>
           <Navbar />
-          <main className="flex-grow w-full md:w-[80%] mx-auto bg-white">
+          <main className="flex-grow w-full md:w-[80%] mx-auto bg-white/50">
             {children}
           </main>
         </AuthSessionProvider>

@@ -128,8 +128,13 @@ model Character {
   raw_other_stat                      Json?
   raw_ring_exchange_skill_equipment   Json?
 
+  raw_union                           Json?
+  raw_union_raider                    Json?
+  raw_union_artifact                  Json?
+  raw_union_champion                  Json?
+
   status                              String    @default("PENDING") // PENDING, ACTIVE, INACTIVE, FAILED
-  lastFetchedAt                       DateTime?
+  lastFetchedAt                       DateTime  @default(now())
 
   userId                              String?
   user                                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)

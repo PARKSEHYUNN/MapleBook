@@ -71,15 +71,15 @@ export default function Navbar() {
             <ul className="flex flex-col font-medium p-4 md:p-0 border border-gray-100 rounded-lg bg-gray-50 md:space-x-4 md:flex-row md:mt-0 md:border-0 md:bg-gray-100">
               <li>
                 <Link
-                  href={"/user"}
+                  href={"/rank"}
                   className={
-                    pathname.startsWith("/user")
+                    pathname.startsWith("/rank")
                       ? activeLinkClasses
                       : inactiveLinkClasses
                   }
                   onClick={() => setIsMainMenuOpen(false)}
                 >
-                  캐릭터 검색
+                  랭킹
                 </Link>
               </li>
               <li>
@@ -92,7 +92,20 @@ export default function Navbar() {
                   }
                   onClick={() => setIsMainMenuOpen(false)}
                 >
-                  길드 검색
+                  길드
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={"/board"}
+                  className={
+                    pathname.startsWith("/board")
+                      ? activeLinkClasses
+                      : inactiveLinkClasses
+                  }
+                  onClick={() => setIsMainMenuOpen(false)}
+                >
+                  게시판
                 </Link>
               </li>
             </ul>

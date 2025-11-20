@@ -34,6 +34,10 @@ body {
   font-family: var(--galmuri);
 }
 
+.nexon {
+  font-family: var(--nexon);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

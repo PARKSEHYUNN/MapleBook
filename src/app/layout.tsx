@@ -41,6 +41,28 @@ const galmuriFont = localFont({
   variable: "--galmuri",
 });
 
+const nexonLv1Font = localFont({
+  src: [
+    {
+      path: "./fonts/NEXONLv1GothicLight.ttf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "./fonts/NEXONLv1GothicRegular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/NEXONLv1GothicBold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--nexon",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "MapleBook",
   description: "Search Maplestory Character",
@@ -66,8 +88,9 @@ export default async function RootLayout({
         ></script>
       </head>
       <body
-        className={`${pretendardFont.variable} ${galmuriFont.variable} antialiased flex flex-col min-h-screen bg-white bg-[url('/background.png')] bg-cover`} //
+        className={`${pretendardFont.variable} ${galmuriFont.variable} ${nexonLv1Font.variable} antialiased flex flex-col min-h-screen`}
       >
+        <div className="fixed inset-0 -z-10 bg-[url('/background.png')] bg-cover bg-center bg-no-repeat" />
         <AuthSessionProvider session={session}>
           <Navbar />
           <main className="flex-grow w-full md:w-[80%] mx-auto bg-white/50">

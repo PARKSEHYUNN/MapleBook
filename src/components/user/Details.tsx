@@ -1,194 +1,383 @@
 // src/components/user/Details.tsx
 
+import { CharacterWithRaw } from "@/app/user/[characterName]/page";
+import formatFloat from "@/lib/formatFloat";
+import formatNumber from "@/lib/formatNumber";
+import formatToKoreanNumber from "@/lib/formatToKoreanNumber";
+import getAvg from "@/lib/getAvg";
+import Tooltip from "@/components/Tooltip";
+import {
+  faArrowUp,
+  faCircle,
+  faCircleArrowUp,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Character } from "@prisma/client";
-
-/**
- * 들어갈 정보
- *
- * 캐릭터 스텟
- *  - 스텟 공격력 (최소 스텟 공격력 ~ 최대 스텟 공격력)
- *  - 데미지
- *  - 보스 몬스터 데미지
- *  - 최종 데미지
- *  - 방어율 무시
- *  - 크리티컬 확률
- *  - 크리티컬 데미지
- *  - 상태이상 내성
- *  - 스탠스
- *  - 방어력
- *  - 이동 속도
- *  - 점프력
- *  - 스타포스
- *  - 아케인 포스
- *  - 어센틱 포스
- *  - STR (AP 배분 STR)
- *  - DEX (AP 배분 DEX)
- *  - INT (AP 배분 INT)
- *  - LUK (AP 배분 LUK)
- *  - HP (AP 배분 HP)
- *  - MP (AP 배분 MP)
- *  - 아이템 드롭률
- *  - 메소 획득량
- *  - 버프 지속시간
- *  - 공격 속도
- *  - 일반 몬스터 데미지
- *  - 재사용 대기시간 감소 (초)
- *  - 재사용 대기시간 감소 (%)
- *  - 재사용 대기시간 미적용
- *  - 속성 내성 무시
- *  - 상태이상 추가 데미지
- *  - 무기 숙련도
- *  - 추가 경험치 획득
- *  - 공격력
- *  - 마력
- *  - 소환수 지속시간 증가
- *
- * 하이퍼 스텟
- *  - 프리셋 1
- *  - 프리셋 2
- *  - 프리셋 3
- *  - 적용된 스탯만 표시 및 레벨 과 적용된 스탯 상세 정보
- * 캐릭터 성향
- * 캐릭터 어빌리티 (모든 프리셋, 적용중인 프리셋 눈에 띄게)
- *  - 프리셋 1
- *  - 프리셋 2
- *  - 프리셋 3
- * 무릉도장
- * 기타 적용 스탯
- *
- */
+import { useMemo, useRef, useState } from "react";
+import HyperStat from "./HyperStat";
+import Ability from "./Ability";
 
 type Props = {
-  characterData: CharacterWithRawStat;
-};
-
-type CharacterWithRawStat = Omit<Character, "raw_stat"> & {
-  raw_stat: RawStat;
-};
-
-type RawStat = {
-  character_class: string;
-  date: Date | null;
-  final_stat: Array<FinalStat>;
-};
-
-type FinalStat = {
-  stat_name: string;
-  stat_value: string;
-};
-
-const PERCENT_STATS = new Set([
-  "데미지",
-  "보스 몬스터 데미지",
-  "최종 데미지",
-  "방어율 무시",
-  "크리티컬 확률",
-  "크리티컬 데미지",
-  "스탠스",
-  "아이템 드롭률",
-  "메소 획득량",
-  "버프 지속시간",
-  "재사용 대기시간 감소 (%)",
-  "속성 내성 무시",
-  "상태이상 추가 데미지",
-  "추가 경험치 획득",
-  "소환수 지속시간 증가",
-  "일반 몬스터 데미지",
-  "재사용 대기시간 미적용",
-]);
-
-const BASIC_STAT = new Set(["STR", "DEX", "INT", "LUK", "HP", "MP"]);
-
-const AP_STAT = new Set([
-  "AP 배분 STR",
-  "AP 배분 DEX",
-  "AP 배분 INT",
-  "AP 배분 LUK",
-  "AP 배분 HP",
-  "AP 배분 MP",
-]);
-
-const formatNumber = (value: string) => {
-  if (isNaN(Number(value))) return value;
-  return Number(value).toLocaleString();
+  characterData: CharacterWithRaw;
 };
 
 export default function Details({ characterData }: Props) {
-  const getProcessedStats = () => {
-    const rawStats = characterData.raw_stat?.final_stat || [];
+  const [page, setPage] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    return rawStats.reduce((acc, stat) => {
-      if (stat.stat_name === "최소 스탯공격력") return acc;
-      if (stat.stat_name === "최대 스탯공격력") {
-        const minStat = rawStats.find((s) => s.stat_name === "최소 스탯공격력");
-        const minVal = minStat ? formatNumber(minStat.stat_value) : "0";
-        const maxVal = formatNumber(stat.stat_value);
+  const handleWheel = (e: React.WheelEvent) => {
+    if (timerRef.current) return;
 
-        acc.push({
-          stat_name: "스탯공격력",
-          stat_value: `${minVal} ~ ${maxVal}`,
-        });
+    setPage((prevPage) => (prevPage === 0 ? 1 : 0));
 
-        return acc;
-      }
-
-      if (AP_STAT.has(stat.stat_name)) return acc;
-      for (const basicStat of BASIC_STAT) {
-        if (stat.stat_name === basicStat) {
-          const apStat = rawStats.find(
-            (s) => s.stat_name === `AP 배분 ${basicStat}`
-          );
-          const apVal = apStat ? formatNumber(apStat.stat_value) : "0";
-          const defaultVal = formatNumber(stat.stat_value);
-
-          acc.push({
-            stat_name: stat.stat_name,
-            stat_value: `${defaultVal} (+ ${apVal})`,
-          });
-
-          return acc;
-        }
-      }
-
-      if (stat.stat_name === "공격 속도") {
-        acc.push({
-          stat_name: "공격 속도",
-          stat_value: `${stat.stat_value} 단계`,
-        });
-
-        return acc;
-      }
-
-      let formattedValue = stat.stat_value;
-
-      if (!isNaN(Number(stat.stat_value))) {
-        formattedValue = formatNumber(stat.stat_value);
-      }
-
-      if (PERCENT_STATS.has(stat.stat_name)) {
-        formattedValue += "%";
-      }
-
-      acc.push({
-        stat_name: stat.stat_name,
-        stat_value: formattedValue,
-      });
-
-      return acc;
-    }, [] as FinalStat[]);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+    }, 500);
   };
 
-  const processedStats = getProcessedStats();
+  const statsMap = useMemo(() => {
+    return characterData.raw_stat.final_stat.reduce((acc, cur) => {
+      acc[cur.stat_name] = cur.stat_value;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [characterData.raw_stat.final_stat]);
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-2">
-        {processedStats.map((stat) => (
-          <div className="bg-gray-300 rounded-lg p-2" key={stat.stat_name}>
-            <p className="text-sm">{stat.stat_name}</p>
-            <p className="text-xs ms-1">{stat.stat_value}</p>
+      <div className="w-[80%] mx-auto">
+        <div className="w-full m-2 p-3 flex justify-center itmes-center bg-sky-800 text-white rounded-lg relative">
+          <p className="nexon font-bold absolute left-5 top-1/2 -translate-y-1/2">
+            전투력
+          </p>
+          <p className="text-xl nexon font-bold">
+            {formatToKoreanNumber(
+              characterData.character_combat_power?.toString() || 0
+            )}
+          </p>
+        </div>
+
+        <div className="w-full m-2 p-4 grid grid-cols-2 gap-5 justify-center itmes-center bg-gray-400 text-white rounded-lg relative">
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">HP</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["HP"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 HP"])})
+            </p>
           </div>
-        ))}
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">MP</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["MP"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 MP"])})
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">STR</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["STR"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 STR"])})
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">DEX</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["DEX"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 DEX"])})
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">INT</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["INT"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 INT"])})
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">LUK</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["LUK"])} (+{" "}
+              {formatNumber(statsMap["AP 배분 LUK"])})
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full m-2 p-4 grid grid-cols-2 gap-5 justify-center itmes-center bg-gray-500 text-white rounded-lg relative">
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              스탯 공격력
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatToKoreanNumber(
+                getAvg(statsMap["최소 스탯공격력"], statsMap["최대 스탯공격력"])
+              )}
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">데미지</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["데미지"], 2)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              최종 데미지
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["최종 데미지"], 2)}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              보스 몬스터 데미지
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["보스 몬스터 데미지"], 2)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              방어율 무시
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["방어율 무시"], 2)}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              일반 몬스터 데미지
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["일반 몬스터 데미지"], 2)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">공격력</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["공격력"])}
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              크리티컬 확률
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["크리티컬 확률"], 0)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">마력</p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["마력"])}
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              크리티컬 데미지
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["크리티컬 데미지"], 2)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              재사용 대기시간 감소
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatNumber(statsMap["재사용 대기시간 감소 (초)"])}초 /{" "}
+              {formatNumber(statsMap["재사용 대기시간 감소 (%)"])}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              버프 지속시간
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["버프 지속시간"], 0)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              재사용 대기시간 미적용
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["재사용 대기시간 미적용"], 2)}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              속성 내성 무시
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["속성 내성 무시"], 2)}%
+            </p>
+          </div>
+
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              상태이상 추가 데미지
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["상태이상 추가 데미지"], 2)}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              소환수 지속시간 증가
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["소환수 지속시간 증가"], 0)}%
+            </p>
+          </div>
+          <div className="w-full flex justify-between items-center">
+            <p className="nexon font-bold text-sm text-shadow-lg">
+              무기 숙련도
+            </p>
+            <p className="galmuri text-xs text-shadow-lg">
+              {formatFloat(statsMap["무기 숙련도"], 0)}%
+            </p>
+          </div>
+        </div>
+
+        <div
+          className="w-full m-2 p-4 bg-gray-500 text-white rounded-lg relative"
+          onWheel={handleWheel}
+        >
+          {page === 0 && (
+            <div className="grid grid-cols-2 gap-5 justify-center itmes-center">
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  메소 획득량
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["메소 획득량"], 0)}%
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  스타포스
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["스타포스"])}
+                </p>
+              </div>
+
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  아이템 드롭률
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["아이템 드롭률"], 0)}%
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  아케인포스
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["아케인포스"])}
+                </p>
+              </div>
+
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  추가 경험치 획득
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["추가 경험치 획득"], 2)}%
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  어센틱포스
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["어센틱포스"])}
+                </p>
+              </div>
+            </div>
+          )}
+          {page === 1 && (
+            <div className="grid grid-cols-2 gap-5 justify-center itmes-center">
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">방어력</p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["방어력"])}
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  상태이상 내성
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["상태이상 내성"])}
+                </p>
+              </div>
+
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  이동속도
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["이동속도"], 0)}%
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">점프력</p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["점프력"], 0)}%
+                </p>
+              </div>
+
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">스탠스</p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatFloat(statsMap["스탠스"], 0)}%
+                </p>
+              </div>
+              <div className="w-full flex justify-between items-center">
+                <p className="nexon font-bold text-sm text-shadow-lg">
+                  공격 속도
+                </p>
+                <p className="galmuri text-xs text-shadow-lg">
+                  {formatNumber(statsMap["공격 속도"])}단계
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="w-full flex justify-center mt-2 gap-2">
+            <div
+              className={`text-[7px] hover:cursor-pointer ${
+                page === 0 ? "text-white" : "text-gray-600"
+              }`}
+              onClick={() => setPage(0)}
+            >
+              <FontAwesomeIcon icon={faCircle} />
+            </div>
+            <div
+              className={`text-[7px] hover:cursor-pointer ${
+                page === 1 ? "text-white" : "text-gray-600"
+              }`}
+              onClick={() => setPage(1)}
+            >
+              <FontAwesomeIcon icon={faCircle} />
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full m-2 grid md:grid-cols-2 gap-5">
+          <HyperStat characterData={characterData} />
+          <Ability characterData={characterData} />
+        </div>
       </div>
     </div>
   );

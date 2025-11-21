@@ -3,8 +3,9 @@
 import { CharacterWithRaw, ItemData } from "@/app/user/[characterName]/page";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import ItemSlot from "../ItemSlot";
+import ItemTooltip from "../ItemTooltip";
 
 const EQUIPMENT_SLOTS = [
   // ROW 1
@@ -37,7 +38,7 @@ const EQUIPMENT_SLOTS = [
   { slot: "무기" },
   { slot: "보조무기" },
   { slot: "엠블렘" },
-  { slot: "null" },
+  { slot: "안드로이드" },
   { slot: "기계 심장" },
 
   // ROW 6
@@ -70,6 +71,18 @@ export default function Equipment({ characterData }: Props) {
     }, {} as Record<string, ItemData>);
   }, [characterData, preset]);
 
+  const currentAndriod = useMemo(() => {
+    const androidData = characterData.raw_android_equipment;
+
+    const targetAndroid = [
+      androidData.android_preset_1,
+      androidData.android_preset_2,
+      androidData.android_preset_3,
+    ][preset];
+
+    return targetAndroid || androidData.android_preset_1;
+  }, [characterData.raw_android_equipment, preset]);
+
   return (
     <div>
       <div className="w-full flex justify-end mt-10">
@@ -92,6 +105,29 @@ export default function Equipment({ characterData }: Props) {
                 ></div>
               );
 
+            if (slotInfo.slot === "안드로이드") {
+              return (
+                <div
+                  className={`w-16 h-16 border-2 rounded-sm bg-gray-200 flex items-center justify-center border-gray-300 ${
+                    slotInfo.colStart ? `col-start-${slotInfo.colStart}` : ""
+                  }`}
+                  key={slotInfo.slot}
+                >
+                  {currentAndriod ? (
+                    <>
+                      <img
+                        src={currentAndriod.android_icon}
+                        alt={currentAndriod.android_name}
+                        className="scale-[1.3]"
+                      />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              );
+            }
+
             const item = currentItemMap[slotInfo.slot];
 
             return (
@@ -112,10 +148,8 @@ export default function Equipment({ characterData }: Props) {
           <div className="grid grid-cols-3 gap-2">
             <div
               className={`galmuri w-6 h-6 border rounded-lg text-xs flex justify-center items-center shadow-lg hover:cursor-pointer ${
-                preset === 0
-                  ? "bg-gray-600 border-white"
-                  : "bg-gray-400 border-gray-500"
-              }`}
+                initialPreset === 0 ? "bg-gray-600" : "bg-gray-400"
+              } ${preset === 0 ? "border-white" : "border-gray-500"}`}
               onClick={() => setPreset(0)}
             >
               <p className="text-center text-bold nexon">1</p>
@@ -123,10 +157,8 @@ export default function Equipment({ characterData }: Props) {
 
             <div
               className={`galmuri w-6 h-6 border rounded-lg text-xs flex justify-center items-center shadow-lg hover:cursor-pointer ${
-                preset === 1
-                  ? "bg-gray-600 border-white"
-                  : "bg-gray-400 border-gray-500"
-              }`}
+                initialPreset === 1 ? "bg-gray-600" : "bg-gray-400"
+              } ${preset === 1 ? "border-white" : "border-gray-500"}`}
               onClick={() => setPreset(1)}
             >
               <p className="text-center text-bold nexon">2</p>
@@ -134,10 +166,8 @@ export default function Equipment({ characterData }: Props) {
 
             <div
               className={`galmuri w-6 h-6 border rounded-lg text-xs flex justify-center items-center shadow-lg hover:cursor-pointer ${
-                preset === 2
-                  ? "bg-gray-600 border-white"
-                  : "bg-gray-400 border-gray-500"
-              }`}
+                initialPreset === 2 ? "bg-gray-600" : "bg-gray-400"
+              } ${preset === 2 ? "border-white" : "border-gray-500"}`}
               onClick={() => setPreset(2)}
             >
               <p className="text-center text-bold nexon">3</p>

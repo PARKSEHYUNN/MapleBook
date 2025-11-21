@@ -67,7 +67,7 @@ export default function UsersPage({ params }: Props) {
     fetchData();
   }, [parseCharacterName]);
 
-  console.log(characterData);
+  //console.log(characterData);
   return (
     <div className="flex w-full flex-col items-center justify-center p-5">
       {loading && <FontAwesomeIcon icon={faSpinner} spin />}

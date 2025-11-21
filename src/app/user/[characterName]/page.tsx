@@ -20,6 +20,8 @@ import Board from "@/components/user/Board";
 import Swal from "sweetalert2";
 import Details from "@/components/user/Details";
 import Equipment from "@/components/user/Equipment";
+import { useRouter } from "next/navigation";
+import formatTimeAgo from "@/lib/formatTimeAgo";
 
 const TABS = [
   { id: "board", label: "방명록", icon: faChalkboard },
@@ -46,6 +48,7 @@ export type CharacterWithRaw = Omit<
   | "raw_hyper_stat"
   | "raw_ability"
   | "raw_item_equipment"
+  | "raw_android_equipment"
 > & {
   raw_dojang: RawDojang;
   raw_union: RawUnion;
@@ -53,6 +56,7 @@ export type CharacterWithRaw = Omit<
   raw_hyper_stat: RawHyperStat;
   raw_ability: RawAbility;
   raw_item_equipment: RawItemEquipment;
+  raw_android_equipment: RawAndroid;
 };
 
 type RawDojang = {
@@ -304,9 +308,108 @@ type MedalShape = {
   medal_shape_changed_description: string;
 };
 
+type RawAndroid = {
+  android_name: string;
+  android_nickname: string;
+  android_icon: string;
+  android_description: string;
+  android_hair: {
+    hair_name: string;
+    base_color: string;
+    mix_color: string;
+    mix_rate: string;
+    freestyle_flag: string;
+  };
+  android_face: {
+    face_name: string;
+    base_color: string;
+    mix_color: string;
+    mix_rate: string;
+    freestyle_flag: string;
+  };
+  android_skin: {
+    skin_name: string;
+    color_style: string;
+    hue: number;
+    saturation: number;
+    brightness: number;
+  };
+  android_cash_item_equipment: Array<AndroidCashItem>;
+  android_ear_sensor_clip_flag: string;
+  android_gender: string;
+  android_grade: string;
+  android_non_humanoid_flag: string;
+  android_shop_usable_flag: string;
+  preset_no: number;
+  android_preset_1: AndroidPreset;
+  android_preset_2: AndroidPreset;
+  android_preset_3: AndroidPreset;
+};
+
+type AndroidCashItem = {
+  cash_item_equipment_part: string;
+  cash_item_equipment_slot: string;
+  cash_item_name: string;
+  cash_item_icon: string;
+  cash_item_description: string;
+  cash_item_option: Array<AndroidCashItemOption>;
+  date_expire: Date | null;
+  date_option_expire: Date | null;
+  cash_item_label: string;
+  cash_item_coloring_prism: {
+    color_range: string;
+    hue: number;
+    saturation: number;
+    value: number;
+  };
+  android_item_gender: string;
+  freestyle_flag: string;
+};
+
+type AndroidCashItemOption = {
+  option_type: string;
+  option_value: string;
+};
+
+export type AndroidPreset = {
+  android_name: string;
+  android_nickname: string;
+  android_icon: string;
+  android_description: string;
+  android_hair: {
+    hair_name: string;
+    base_color: string;
+    mix_color: string;
+    mix_rate: string;
+    freestyle_flag: string;
+  };
+  android_face: {
+    face_name: string;
+    base_color: string;
+    mix_color: string;
+    mix_rate: string;
+    freestyle_flag: string;
+  };
+  android_skin: {
+    skin_name: string;
+    color_style: string;
+    hue: number;
+    saturation: number;
+    brightness: number;
+  };
+
+  android_ear_sensor_clip_flag: string;
+  android_gender: string;
+  android_grade: string;
+  android_non_humanoid_flag: string;
+  android_shop_usable_flag: string;
+};
+
 export default function UserPage({ params }: Props) {
   const { characterName: urlCharacterName } = use(params);
   const characterName = decodeURI(urlCharacterName);
+
+  const router = useRouter();
 
   const hash = useHash();
   const activeTab = useMemo(() => {
@@ -318,6 +421,8 @@ export default function UserPage({ params }: Props) {
   const [characterData, setCharacterData] = useState<CharacterWithRaw | null>(
     null
   );
+  const [isRefreshLoading, setIsRefreshLoading] = useState(false);
+  const [refreshText, setRefreshText] = useState("로딩 중");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -343,6 +448,81 @@ export default function UserPage({ params }: Props) {
 
     fetchData();
   }, [characterName]);
+
+  const handleRefresh = async () => {
+    if (isRefreshLoading) return null;
+
+    try {
+      setIsRefreshLoading(true);
+
+      if (
+        characterData &&
+        !(
+          new Date().getTime() -
+            new Date(characterData.lastFetchedAt).getTime() >=
+          5 * 60 * 1000
+        )
+      ) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        Toast.fire({
+          icon: "error",
+          title: "갱신은 5분에 1번만 가능합니다!",
+        });
+
+        return null;
+      }
+
+      const res = await fetch(
+        `/api/user?characterName=${characterName}&forceRefresh=true`,
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "갱신 요청 실패");
+      }
+
+      const { data } = await res.json();
+
+      setCharacterData(data);
+      router.refresh();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "데이터를 새로고침 하는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setIsRefreshLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (characterData) {
+      setRefreshText(formatTimeAgo(characterData.lastFetchedAt));
+
+      timer = setInterval(() => {
+        setRefreshText(formatTimeAgo(characterData.lastFetchedAt));
+      }, 1000);
+    }
+
+    return () => clearInterval(timer);
+  });
 
   console.log(characterData);
 
@@ -416,26 +596,15 @@ export default function UserPage({ params }: Props) {
                 <div className="flex flex-col items-end justify-between pt-3 pb-3 p">
                   <div
                     className="text-center bg-gray-400 text-white rounded-xl w-40 flex justify-between items-center h-7 ps-3 pe-3 galmuri text-sm hover:bg-gray-500 hover:cursor-pointer"
-                    onClick={() => {
-                      const Toast = Swal.mixin({
-                        toast: true,
-                        position: "top-end",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                          toast.onmouseenter = Swal.stopTimer;
-                          toast.onmouseleave = Swal.resumeTimer;
-                        },
-                      });
-                      Toast.fire({
-                        icon: "error",
-                        title: "갱신은 10분에 1번만 가능합니다!",
-                      });
-                    }}
+                    onClick={handleRefresh}
                   >
                     <p className="text-gray-200">갱신시간</p>
-                    <p className="text-xs">{"1분 전"}</p>
+                    <p className="text-xs">
+                      {isRefreshLoading && (
+                        <FontAwesomeIcon icon={faSpinner} spin />
+                      )}
+                      {!isRefreshLoading && refreshText}
+                    </p>
                   </div>
                   <div className="flex flex-col gap-1">
                     <div className="text-center bg-gray-600/80 text-white rounded-xl w-40 flex justify-between items-center h-7 ps-3 pe-3 galmuri text-sm">

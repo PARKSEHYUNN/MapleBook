@@ -29,7 +29,7 @@ export default function Ability({ characterData }: Props) {
     레어: "bg-sky-400",
   };
 
-  console.log(gradeColor[currentAbility.ability_preset_grade]);
+  //console.log(gradeColor[currentAbility.ability_preset_grade]);
 
   return (
     <div className="w-full flex flex-col gap-1 bg-gray-400 rounded-lg p-4">

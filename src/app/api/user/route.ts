@@ -7,7 +7,10 @@ import {
 } from "@/lib/apiResponses";
 import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 const EXPIRED_CHARACTER_DATA_MS = 15 * 24 * 60 * 60 * 1000;
 
@@ -18,9 +21,19 @@ const headers = {
   "x-nxopen-api-key": NEXON_API_KEY,
 };
 
+// [Helper] BigInt를 JSON으로 보낼 수 있게 변환하는 함수
+const serializeData = (data: any) => {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) =>
+      typeof value === "bigint" ? value.toString() : value
+    )
+  );
+};
+
 const getNexonAPI = async (characterName: string) => {
   const ocidRes = await fetch(`${baseUrl}/id?character_name=${characterName}`, {
     headers,
+    cache: "no-store",
   });
 
   if (!ocidRes.ok) return serverErrorResponse("Invalid character name");
@@ -29,10 +42,12 @@ const getNexonAPI = async (characterName: string) => {
 
   const basicRes = await fetch(`${baseUrl}/character/basic?ocid=${ocid}`, {
     headers,
+    cache: "no-store",
   });
 
   if (!basicRes.ok) return serverErrorResponse("Failed get character data");
   const basicData = await basicRes.json();
+  // ... (기존 변수 할당 로직 동일)
   const characterNameData = basicData.character_name;
   const worldName = basicData.world_name;
   const characterClass = basicData.character_class;
@@ -49,33 +64,32 @@ const getNexonAPI = async (characterName: string) => {
   const access_flag = basicData.access_flag === "true";
   const liberation_quest_clear = parseInt(basicData.liberation_quest_clear);
 
-  // 인기도 정보 호출
+  // 인기도
   const popularityRes = await fetch(
     `${baseUrl}/character/popularity?ocid=${ocid}`,
-    { headers }
+    { headers, cache: "no-store" }
   );
-  if (!popularityRes.ok)
-    throw new Error(`NEXON popularity API failed: ${popularityRes.statusText}`);
-
+  if (!popularityRes.ok) throw new Error("NEXON popularity API failed");
   const popularityData = await popularityRes.json();
   const character_popularity = parseInt(popularityData.popularity);
 
-  // 스탯 정보 호출
+  // 스탯
   const statRes = await fetch(`${baseUrl}/character/stat?ocid=${ocid}`, {
     headers,
+    cache: "no-store",
   });
-  if (!statRes.ok)
-    throw new Error(`NEXON stat API failed: ${popularityRes.statusText}`);
-
+  if (!statRes.ok) throw new Error("NEXON stat API failed");
   const statData = await statRes.json();
+
+  // [수정 1] 콤마 제거 후 BigInt 변환 (여기서 에러 자주 발생함)
   const character_combat_power_ = statData.final_stat.find(
     (stat: { stat_name: string }) => stat.stat_name === "전투력"
   );
   const character_combat_power = character_combat_power_
-    ? BigInt(character_combat_power_.stat_value)
-    : 0;
+    ? BigInt(character_combat_power_.stat_value.replace(/,/g, "")) // 콤마 제거
+    : BigInt(0);
 
-  // API 호출
+  // API Endpoint 목록
   const endpoints = [
     "stat",
     "hyper-stat",
@@ -110,7 +124,6 @@ const getNexonAPI = async (characterName: string) => {
     "5",
     "6",
   ];
-
   const union_endpoints = [
     "union",
     "union-raider",
@@ -118,8 +131,12 @@ const getNexonAPI = async (characterName: string) => {
     "union-champion",
   ];
 
+  // [수정 2] 모든 fetch에 cache: "no-store" 추가
   const fetchPromises = endpoints.map((endpoint) =>
-    fetch(`${baseUrl}/character/${endpoint}?ocid=${ocid}`, { headers })
+    fetch(`${baseUrl}/character/${endpoint}?ocid=${ocid}`, {
+      headers,
+      cache: "no-store",
+    })
       .then((res) => (res.ok ? res.json() : { error: `Failed ${endpoint}` }))
       .catch((err) => ({ error: `Fetch error ${endpoint}` }))
   );
@@ -127,7 +144,10 @@ const getNexonAPI = async (characterName: string) => {
   const skillFetchPromises = skillGrades.map((grade) =>
     fetch(
       `${baseUrl}/character/skill?ocid=${ocid}&character_skill_grade=${grade}`,
-      { headers }
+      {
+        headers,
+        cache: "no-store",
+      }
     )
       .then((res) => (res.ok ? res.json() : { error: `Failed skill ${grade}` }))
       .then((data) => ({ grade, data }))
@@ -135,7 +155,10 @@ const getNexonAPI = async (characterName: string) => {
   );
 
   const fetchUnionPromises = union_endpoints.map((endpoint) =>
-    fetch(`${baseUrl}/user/${endpoint}?ocid=${ocid}`, { headers })
+    fetch(`${baseUrl}/user/${endpoint}?ocid=${ocid}`, {
+      headers,
+      cache: "no-store",
+    })
       .then((res) =>
         res.ok ? res.json() : { error: `Failed union ${endpoint}` }
       )
@@ -161,13 +184,16 @@ const getNexonAPI = async (characterName: string) => {
     results[endpoint] = unionResultArray[index];
   });
 
+  // [수정 3] 오타 수정 (union-artifact) 및 Upsert 실행
   const characterData = await prisma.character.upsert({
     where: { ocid: ocid },
     update: {
+      // ... (기존과 동일) ...
       status: "ACTIVE",
       character_image: characterImage,
       character_level: characterLevel,
       character_gender: characterGender,
+      character_class: characterClass, // 직업 갱신
       character_class_level: characterClassLevel,
       character_exp: characterExp,
       character_exp_rate: characterExpRate,
@@ -201,12 +227,13 @@ const getNexonAPI = async (characterName: string) => {
 
       raw_union: results["union"] || {},
       raw_union_raider: results["union-raider"] || {},
-      raw_union_artifact: results["union-artiface"] || {},
+      raw_union_artifact: results["union-artifact"] || {}, // 오타 수정됨
       raw_union_champion: results["union-champion"] || {},
 
       lastFetchedAt: new Date(),
     },
     create: {
+      // ... (create도 update와 동일하게 수정, 특히 artifact 오타 확인) ...
       character_name: characterNameData,
       world_name: worldName,
       character_class: characterClass,
@@ -255,8 +282,7 @@ const getNexonAPI = async (characterName: string) => {
     },
   });
 
-  console.log(characterData);
-
+  // console.log(characterData); // BigInt 때문에 로그 찍을때도 에러 날 수 있으니 주의
   return characterData;
 };
 
@@ -264,6 +290,9 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
     const characterNameParam = searchParams.get("characterName");
+    const forceRefresh = searchParams.get("forceRefresh") === "true";
+
+    console.log(`Request: ${characterNameParam}, Force: ${forceRefresh}`);
 
     if (!characterNameParam)
       return serverErrorResponse("Invalid character name");
@@ -278,31 +307,25 @@ export async function GET(req: NextRequest) {
 
     if (characterData) {
       const nowMs = new Date().getTime();
-      const lastFetchedAtMs = new Date(characterData?.lastFetchedAt);
-      const elapsedMs = +nowMs - +lastFetchedAtMs;
+      const lastFetchedAtMs = new Date(characterData.lastFetchedAt).getTime();
+      const elapsedMs = nowMs - lastFetchedAtMs;
 
       if (elapsedMs >= EXPIRED_CHARACTER_DATA_MS) isForceFetch = true;
+      if (forceRefresh) isForceFetch = true;
     }
 
     if (!characterData || isForceFetch) {
+      console.log("Fetching new data from NEXON...");
       const newData = await getNexonAPI(characterName);
-      return successResponse({ data: newData });
+      revalidatePath(`/user/${characterName}`);
+      // [수정 4] BigInt 직렬화 (serializeData 사용)
+      return successResponse(serializeData({ data: newData }));
     }
 
-    return successResponse({ data: characterData });
+    // 기존 데이터 반환 시에도 BigInt 직렬화
+    return successResponse(serializeData({ data: characterData }));
   } catch (error) {
-    console.log(error);
+    console.error("API Error Details:", error);
     return badRequestResponse();
   }
 }
-
-/**
- * ## /api/user GET
- * 1. 캐릭터 닉네임 확인
- * 1-1. 캐릭터 닉네임 없는 경우 - badRequest 전송
- *
- * 2. 캐릭터 닉네임으로 데이터베이스 데이터 확인
- * 2-1. 캐릭터 데이터가 데이터베이스에 없거나 캐릭터 데이터가 있지만 마지막 갱신 시간이 15일 이상인 경우 - 넥슨 API 에서 데이터 조회 및 db에 데이터 작성
- *
- * 3. DB또는 upsert 에서 받아온 정보를 successRequest 전송
- */

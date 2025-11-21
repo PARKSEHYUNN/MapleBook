@@ -247,7 +247,7 @@ const getNexonAPI = async (ocid: string) => {
     },
   });
 
-  console.log(characterData);
+  //console.log(characterData);
 
   return characterData;
 };

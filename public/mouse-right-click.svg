@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+  <g transform="translate(64, 64)">
+    <path 
+      d="M176 32h160a144 144 0 0 1 144 144v160a144 144 0 0 1-144 144H176A144 144 0 0 1 32 336V176A144 144 0 0 1 176 32z" 
+      fill="none" 
+      stroke="currentColor" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" 
+      stroke-width="32"
+    />
+    <line 
+      x1="32" y1="224" x2="480" y2="224" 
+      fill="none" 
+      stroke="currentColor" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" 
+      stroke-width="32"
+    />
+    <line 
+      x1="256" y1="32" x2="256" y2="224" 
+      fill="none" 
+      stroke="currentColor" 
+      stroke-linecap="round" 
+      stroke-linejoin="round" 
+      stroke-width="32"
+    />
+  </g>
+</svg>

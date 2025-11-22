@@ -49,6 +49,8 @@ export type CharacterWithRaw = Omit<
   | "raw_ability"
   | "raw_item_equipment"
   | "raw_android_equipment"
+  | "raw_cashitem_equipment"
+  | "raw_beauty_equipment"
 > & {
   raw_dojang: RawDojang;
   raw_union: RawUnion;
@@ -57,6 +59,8 @@ export type CharacterWithRaw = Omit<
   raw_ability: RawAbility;
   raw_item_equipment: RawItemEquipment;
   raw_android_equipment: RawAndroid;
+  raw_cashitem_equipment: RawCashItemEquipment;
+  raw_beauty_equipment: RawBeautyEquipment;
 };
 
 type RawDojang = {
@@ -174,7 +178,7 @@ export type ItemData = {
   cuttable_count: string;
   golden_hammer_flag: string;
   scroll_resilience_count: string;
-  scroll_upgradable_count: string;
+  scroll_upgradeable_count: string;
   soul_name: string;
   soul_option: string;
   item_etc_option: ItemEctOption;
@@ -186,7 +190,7 @@ export type ItemData = {
   freestyle_flag: string;
 };
 
-type ItemTotalOption = {
+export type ItemTotalOption = {
   str: string;
   dex: string;
   int: string;
@@ -403,6 +407,86 @@ export type AndroidPreset = {
   android_grade: string;
   android_non_humanoid_flag: string;
   android_shop_usable_flag: string;
+};
+
+export type RawCashItemEquipment = {
+  date: Date | null;
+  character_gender: string;
+  character_class: string;
+  character_look_mode: string;
+  preset_no: number;
+  cash_item_equipment_base: Array<CashItemMap>;
+  cash_item_equipment_preset_1: Array<CashItemMap>;
+  cash_item_equipment_preset_2: Array<CashItemMap>;
+  cash_item_equipment_preset_3: Array<CashItemMap>;
+  additional_cash_item_equipment_base: Array<CashItemMap>;
+  additional_cash_item_equipment_preset_1: Array<CashItemMap>;
+  additional_cash_item_equipment_preset_2: Array<CashItemMap>;
+  additional_cash_item_equipment_preset_3: Array<CashItemMap>;
+};
+
+export type CashItemMap = {
+  cash_item_equipment_part: string;
+  cash_item_equipment_slot: string;
+  cash_item_name: string;
+  cash_item_icon: string;
+  cash_item_description: string;
+  cash_item_option: Array<CashItemOption>;
+  date_expire: Date | null;
+  date_option_expire: Date | null;
+  cash_item_label: string;
+  cash_item_coloring_prism: CashItemColoringPrism;
+  item_gender: string;
+  skill: Array<string>;
+  freestyle_flag: string;
+};
+
+type CashItemOption = {
+  option_type: string;
+  option_value: string;
+};
+
+type CashItemColoringPrism = {
+  color_range: string;
+  hue: string;
+  saturation: string;
+  value: string;
+};
+
+export type RawBeautyEquipment = {
+  date: Date | null;
+  character_gender: string;
+  character_class: string;
+  character_hair: BeautyHair;
+  character_face: BeautyFace;
+  character_skin: BeautySkin;
+  additional_character_hair: BeautyHair;
+  additional_character_face: BeautyFace;
+  additional_character_skin: BeautySkin;
+};
+
+export type BeautyHair = {
+  hair_name: string;
+  base_color: string;
+  mix_color: string;
+  mix_rate: string;
+  freestyle_flag: string;
+};
+
+export type BeautyFace = {
+  face_name: string;
+  base_color: string;
+  mix_color: string;
+  mix_rate: string;
+  freestyle_flag: string;
+};
+
+export type BeautySkin = {
+  skin_name: string;
+  color_style: string;
+  hue: number;
+  saturation: number;
+  brightness: number;
 };
 
 export default function UserPage({ params }: Props) {

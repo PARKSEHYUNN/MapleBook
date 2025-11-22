@@ -7,7 +7,7 @@ import ItemTooltip from "./ItemTooltip";
 
 type Props = {
   item?: ItemData;
-  colStart?: number;
+  colStart?: string;
 };
 
 export default function ItemSlot({ item, colStart }: Props) {
@@ -25,14 +25,14 @@ export default function ItemSlot({ item, colStart }: Props) {
   return (
     <div
       className={`w-16 h-16 border-2 rounded-sm bg-gray-200 flex items-center justify-center relative ${borderColor} ${
-        colStart ? `col-start-${colStart}` : ""
+        colStart ? colStart : ""
       }`}
     >
       <ItemTooltip item={item}>
         {item?.date_expire && (
           <FontAwesomeIcon
             icon={faClock}
-            className="absolute text-xs text-red-500 z-1 top-2 left-2 rounded-[100px] bg-white w-3! h-3!"
+            className="absolute text-xs text-red-500 z-9998 top-2 left-2 rounded-[100px] bg-white w-3! h-3!"
           />
         )}
 

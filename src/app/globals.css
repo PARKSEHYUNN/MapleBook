@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
@@ -12,15 +14,20 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  font-family: var(--font-pretendard);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn {
+    @apply rounded-lg border-3 px-3.5 py-1.5 font-medium focus:outline-none;
+  }
+
+  .btn-orange {
+    @apply border-2 border-orange-400 bg-orange-400 text-white hover:cursor-pointer hover:bg-transparent hover:text-orange-400 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-orange-400 disabled:hover:text-white;
+  }
+
+  .btn-outline-orange {
+    @apply border-2 border-orange-400 bg-transparent text-orange-400 hover:cursor-pointer hover:bg-orange-400 hover:text-white disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-orange-400;
+  }
 }

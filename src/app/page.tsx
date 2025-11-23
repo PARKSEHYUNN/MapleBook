@@ -1,303 +1,65 @@
-// src/app/page.tsx
-
-"use client";
-
-import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCrown,
-  faMagnifyingGlass,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { data: session, status } = useSession();
-
-  const [characterName, setCharacterName] = useState("");
-  const router = useRouter();
-
-  const handleSearch = () => {
-    if (!!characterName.trim()) router.push(`/user/${characterName}`);
-  };
-
-  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
   return (
-    <div className="flex w-full flex-col items-center justify-center p-5">
-      <h1 className="mb-3 text-4xl font-bold flex flex-row items-center gap-2">
-        <Image src="/logo.svg" width={64} height={64} alt="Main Logo" />
-        MapleBook
-      </h1>
-
-      <div className="relative w-[60%]">
-        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-          <FontAwesomeIcon icon={faMagnifyingGlass} className="text-gray-500" />
-        </div>
-
-        <input
-          type="text"
-          id="visitors"
-          className="bg-white border border-gray-300 text-heading text-base rounded-[100px] block w-full mx-auto px-4 py-3.5 shadow-xs placeholder:text-body ps-10 focus:outline-none focus:ring-1"
-          placeholder="캐릭터 검색"
-          value={characterName}
-          onChange={(e) => setCharacterName(e.target.value)}
-          onKeyUp={handleEnter}
-          required
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={100}
+          height={20}
+          priority
         />
-
-        <div className="absolute inset-y-0 end-0 flex items-center pe-3">
-          <button
-            className="btn btn-outline-orange rounded-3xl py-1"
-            onClick={handleSearch}
+        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+            To get started, edit the page.tsx file.
+          </h1>
+          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+            Looking for a starting point or more instructions? Head over to{" "}
+            <a
+              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
+            >
+              Templates
+            </a>{" "}
+            or the{" "}
+            <a
+              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
+            >
+              Learning
+            </a>{" "}
+            center.
+          </p>
+        </div>
+        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+          <a
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            검색
-          </button>
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={16}
+              height={16}
+            />
+            Deploy Now
+          </a>
+          <a
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation
+          </a>
         </div>
-      </div>
-
-      <div className="w-[70%] border-t border-gray-300 mt-5 pt-5">
-        <div className="text-center rounded-xl overflow-hidden">
-          <table className="w-full text-sm text-left text-body rounded-lg table-fixed border-separate border-spacing-y-2">
-            <thead className="text-sm text-body bg-ornage-100 border-b rounded-lg border-gray-300">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 font-medium text-center"
-                  colSpan={5}
-                >
-                  검색 기록
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-center">
-              <tr className="mb-1">
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-              </tr>
-              <tr className="mb-1">
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-              </tr>
-              <tr className="mb-1">
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-                <td className="relative">
-                  조금길어지면
-                  <button className="absolute">
-                    <FontAwesomeIcon icon={faXmark} className="text-red-500" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="w-[70%] grid grid-cols-2 gap-5 mt-5 pt-5 border-t border-gray-300">
-        <div className="w-full flex flex-col items-center justify-center">
-          <span className="w-full mb-1">전투력 랭킹</span>
-
-          <div className="text-center rounded-xl overflow-hidden">
-            <table className="w-full text-sm text-left text-body rounded-lg">
-              <thead className="text-sm text-body bg-orange-100 border-b rounded-lg border-gray-300">
-                <tr>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    랭킹
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    이름
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    레벨
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    직업
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    전투력
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <tr
-                    className="bg-white border-b border-gray-300 hover:bg-gray-50 cursor-pointer text-xs"
-                    key={i}
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-heading whitespace-nowrap"
-                    >
-                      {i <= 3 && (
-                        <FontAwesomeIcon
-                          icon={faCrown}
-                          className={
-                            i === 1
-                              ? "text-yellow-500"
-                              : i === 2
-                              ? "text-gray-500"
-                              : "text-yellow-700"
-                          }
-                        />
-                      )}
-
-                      {i > 3 && i}
-                    </th>
-                    <td className="px-6 py-4">리코다요</td>
-                    <td className="px-6 py-4">272</td>
-                    <td className="px-6 py-4">렌</td>
-                    <td className="px-6 py-4 whitespace-nowrap">20,440,904</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="w-full flex flex-col items-center justify-center">
-          <span className="w-full">검색어 랭킹</span>
-
-          <div className="text-center rounded-xl overflow-hidden">
-            <table className="w-full text-sm text-left text-body rounded-lg">
-              <thead className="text-sm text-body bg-orange-100 border-b rounded-lg border-gray-300">
-                <tr>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    랭킹
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    이름
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    레벨
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    직업
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    검색 수
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <tr
-                    className="bg-white border-b border-gray-300 hover:bg-gray-50 cursor-pointer text-xs"
-                    key={i}
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-heading whitespace-nowrap"
-                    >
-                      {i <= 3 && (
-                        <FontAwesomeIcon
-                          icon={faCrown}
-                          className={
-                            i === 1
-                              ? "text-yellow-500"
-                              : i === 2
-                              ? "text-gray-500"
-                              : "text-yellow-700"
-                          }
-                        />
-                      )}
-
-                      {i > 3 && i}
-                    </th>
-                    <td className="px-6 py-4">리코다요</td>
-                    <td className="px-6 py-4">272</td>
-                    <td className="px-6 py-4">렌</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {parseInt((2000 / (i * i)).toString())}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -19,10 +19,14 @@
     "@fortawesome/free-regular-svg-icons": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.0",
+    "@prisma/client": "^6.19.0",
+    "@prisma/extension-accelerate": "^2.0.2",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "recharts": "^3.5.0",
     "sweetalert2": "^11.26.3",
+    "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -36,6 +40,7 @@
     "eslint-config-next": "16.0.3",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
+    "prisma": "^6.19.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

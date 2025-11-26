@@ -76,10 +76,10 @@ export default function HomePage() {
       {/* 캐릭터 검색 */}
       <SearchWithHistory />
 
-      <Separator className="w-[70%] border-gray-300" />
+      <Separator className="w-full border-gray-300 md:w-[70%]" />
 
       {/* 캐릭터 순위 */}
-      <div className="grid w-[70%] grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="grid w-full grid-cols-1 gap-3 md:w-[70%] md:grid-cols-2">
         {/* 전투력 순위 */}
         <RankingTable type="전투력" rankingDatas={rankTempData} />
 

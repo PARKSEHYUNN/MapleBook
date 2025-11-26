@@ -1,0 +1,142 @@
+// prisam/schema.prisma
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                String  @id  @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id            String    @id @default(cuid())
+  sessionToken  String    @unique
+  userId        String
+  expires       DateTime
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createAt      DateTime  @default(now())
+  ip            String?
+  userAgent     String?
+  browser       String?
+  os            String?
+}
+
+model User {
+  id                      String    @id @default(cuid())
+  name                    String?
+  email                   String?   @unique
+  emailVerified           DateTime?
+  image                   String?
+  accounts                Account[]
+  sessions                Session[]
+  loginHistory            LoginHistory[]
+      
+  termsAgreed             Boolean   @default(false)
+  termsAgreedAt           DateTime?
+      
+  encryptedApiKey         String? @db.Text
+  apiKeyHash              String? @unique
+      
+  charactersLastFetchedAt DateTime?
+
+  characters              Character[]
+
+  mainCharacterId         String?     @unique
+  mainCharacter           Character?  @relation("MainCharacter", fields: [mainCharacterId], references: [id], onDelete: SetNull)
+}
+
+model LoginHistory {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  loginAt   DateTime  @default(now())
+  ip        String?
+  browser   String?
+  os        String?
+  userAgent String?
+}
+
+model VerificationToken {
+  identifier  String
+  token       String  @unique
+  expires     DateTime
+
+  @@unique([identifier, token])
+}
+
+model Character {
+  id                                  String    @id @default(cuid())
+  createdAt                           DateTime  @default(now())
+
+  ocid                                String    @unique
+  character_name                      String
+  world_name                          String
+  character_gender                    String?
+  character_class                     String
+  character_class_level               String?
+  character_level                     Int
+
+  character_exp                       BigInt?
+  character_exp_rate                  Float?
+  character_guild_name                String?
+  character_image                     String?
+  character_date_create               DateTime?
+  access_flag                         Boolean?
+  liberation_quest_clear              Int?
+  character_popularity                Int?
+  character_combat_power              BigInt?
+  raw_stat                            Json?
+  raw_hyper_stat                      Json?
+  raw_propensity                      Json?
+  raw_ability                         Json?
+  raw_item_equipment                  Json?
+  raw_cashitem_equipment              Json?
+  raw_symbol_equipment                Json?
+  raw_set_effect                      Json?
+  raw_beauty_equipment                Json?
+  raw_android_equipment               Json?
+  raw_pet_equipment                   Json?
+  raw_skill                           Json?
+  raw_link_skill                      Json?
+  raw_vmatrix                         Json?
+  raw_hexamatrix                      Json?
+  raw_hexamatrix_stat                 Json?
+  raw_dojang                          Json?
+  raw_other_stat                      Json?
+  raw_ring_exchange_skill_equipment   Json?
+
+  raw_union                           Json?
+  raw_union_raider                    Json?
+  raw_union_artifact                  Json?
+  raw_union_champion                  Json?
+
+  status                              String    @default("PENDING") // PENDING, ACTIVE, INACTIVE, FAILED
+  lastFetchedAt                       DateTime  @default(now())
+
+  userId                              String?
+  user                                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mainCharacterOf                     User?     @relation("MainCharacter")
+}

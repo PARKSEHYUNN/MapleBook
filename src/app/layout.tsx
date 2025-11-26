@@ -2,6 +2,7 @@
 import './globals.css';
 import Footer from '@/components/layout/Footer';
 import Navbar from '@/components/layout/Navbar';
+import { Loader } from '@/components/ui/Loader';
 import AlertListener from '@/providers/AlterListener';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -69,7 +70,8 @@ export default function RootLayout({
       >
         <div className='fixed inset-0 -z-10 bg-[url("/images/common/background.png")] bg-cover bg-center bg-no-repeat dark:bg-[url("/images/common/background-dark.png")]'></div>
         <Navbar />
-        <main className="mx-auto mt-5 w-full flex-grow bg-white/80 md:w-[80%] md:rounded-2xl dark:bg-gray-500/60">
+        <main className="mx-auto w-full flex-grow bg-white/80 md:my-5 md:w-[80%] md:rounded-2xl dark:bg-gray-500/60">
+          <Loader />
           <AlertListener />
           {children}
         </main>

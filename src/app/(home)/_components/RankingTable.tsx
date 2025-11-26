@@ -1,5 +1,6 @@
 // src/app/(home)/_components/RankingTable.tsx
-import formatToKoreanNumber from '@/lib/formatToKoreanNumber';
+import { formatToKoreanNumber } from '@/lib/utils/fotmat';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons/faAngleRight';
 import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown';
 import { faRankingStar } from '@fortawesome/free-solid-svg-icons/faRankingStar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,17 +30,22 @@ export default function RankingTable({
   const router = useRouter();
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-3">
       {/* 랭킹 헤더 */}
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-          <FontAwesomeIcon icon={faRankingStar} /> {type} 랭킹
-        </h3>
+        <div className="flex items-center">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+            <FontAwesomeIcon icon={faRankingStar} /> {type} 랭킹
+          </h3>
+          {type === '검색' && (
+            <span className="ms-2 text-sm text-gray-500">최근 7일</span>
+          )}
+        </div>
         <span className="text-xs text-gray-500">Top 5</span>
       </div>
 
       {/* 랭킹 리스트 컨테이너 */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         {rankingDatas.map((data) => {
           const isTop3 = data.rank <= 3;
           const rankColors = [
@@ -122,9 +128,12 @@ export default function RankingTable({
         {/* 랭킹 더보기 */}
         <Link
           href={type === '전투력' ? '/rank#combat' : '/rank#search'}
-          className="flex items-center justify-center rounded-xl border border-transparent bg-gray-50 p-2 transition-all hover:cursor-pointer hover:shadow-md dark:bg-gray-800/50"
+          className="relative flex items-center justify-center rounded-xl border border-transparent bg-gray-50 p-2 transition-all hover:cursor-pointer hover:shadow-md dark:bg-gray-800/50"
         >
           <span className="text-sm">{type} 랭킹 더보기</span>
+          <span className="absolute top-1/2 right-3 -translate-y-1/2">
+            <FontAwesomeIcon icon={faAngleRight} />
+          </span>
         </Link>
       </div>
     </div>

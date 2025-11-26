@@ -18,6 +18,23 @@ body {
   font-family: var(--font-pretendard);
 }
 
+.galmuri {
+  font-family: var(--galmuri);
+}
+
+.nexon {
+  font-family: var(--nexon);
+}
+
+.recharts-wrapper *:focus {
+  outline: none !important;
+}
+
+.recharts-surface,
+.recharts-radar-polygon,
+.recharts-layer path {
+  outline: none !important;
+}
 @layer components {
   .btn {
     @apply rounded-lg border-3 px-3.5 py-1.5 font-medium focus:outline-none;
